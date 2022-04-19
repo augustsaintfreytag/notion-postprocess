@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8B311A77280DE9ED006BDACE /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A76280DE9ED006BDACE /* main.swift */; };
+		8B311A77280DE9ED006BDACE /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A76280DE9ED006BDACE /* Command.swift */; };
+		8B311A7F280DEE4B006BDACE /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 8B311A7E280DEE4B006BDACE /* ArgumentParser */; };
+		8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A80280DF6B9006BDACE /* ArgumentError.swift */; };
+		8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A85280EB021006BDACE /* String+RegularExpression.swift */; };
+		8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A8C280EB4E8006BDACE /* ProcessingError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +28,10 @@
 
 /* Begin PBXFileReference section */
 		8B311A73280DE9ED006BDACE /* Notion Postprocessor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Notion Postprocessor"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8B311A76280DE9ED006BDACE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		8B311A76280DE9ED006BDACE /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		8B311A80280DF6B9006BDACE /* ArgumentError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArgumentError.swift; sourceTree = "<group>"; };
+		8B311A85280EB021006BDACE /* String+RegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegularExpression.swift"; sourceTree = "<group>"; };
+		8B311A8C280EB4E8006BDACE /* ProcessingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B311A7F280DEE4B006BDACE /* ArgumentParser in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,9 +65,60 @@
 		8B311A75280DE9ED006BDACE /* Notion Postprocessor */ = {
 			isa = PBXGroup;
 			children = (
-				8B311A76280DE9ED006BDACE /* main.swift */,
+				8B311A76280DE9ED006BDACE /* Command.swift */,
+				8B311A87280EB49A006BDACE /* Arguments */,
+				8B311A83280EB004006BDACE /* Common */,
+				8B311A8A280EB4B9006BDACE /* Processors */,
 			);
 			path = "Notion Postprocessor";
+			sourceTree = "<group>";
+		};
+		8B311A83280EB004006BDACE /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A84280EB00C006BDACE /* Extensions */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		8B311A84280EB00C006BDACE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A85280EB021006BDACE /* String+RegularExpression.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		8B311A87280EB49A006BDACE /* Arguments */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A88280EB4AA006BDACE /* Errors */,
+			);
+			path = Arguments;
+			sourceTree = "<group>";
+		};
+		8B311A88280EB4AA006BDACE /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A80280DF6B9006BDACE /* ArgumentError.swift */,
+			);
+			path = Errors;
+			sourceTree = "<group>";
+		};
+		8B311A8A280EB4B9006BDACE /* Processors */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A8B280EB4C0006BDACE /* Errors */,
+			);
+			path = Processors;
+			sourceTree = "<group>";
+		};
+		8B311A8B280EB4C0006BDACE /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A8C280EB4E8006BDACE /* ProcessingError.swift */,
+			);
+			path = Errors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -78,6 +137,9 @@
 			dependencies = (
 			);
 			name = "Notion Postprocessor";
+			packageProductDependencies = (
+				8B311A7E280DEE4B006BDACE /* ArgumentParser */,
+			);
 			productName = "Notion Postprocessor";
 			productReference = 8B311A73280DE9ED006BDACE /* Notion Postprocessor */;
 			productType = "com.apple.product-type.tool";
@@ -106,6 +168,9 @@
 				Base,
 			);
 			mainGroup = 8B311A6A280DE9EC006BDACE;
+			packageReferences = (
+				8B311A7D280DEE4B006BDACE /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
 			productRefGroup = 8B311A74280DE9ED006BDACE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -120,7 +185,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B311A77280DE9ED006BDACE /* main.swift in Sources */,
+				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
+				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
+				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
+				8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8B311A7D280DEE4B006BDACE /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8B311A7E280DEE4B006BDACE /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B311A7D280DEE4B006BDACE /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8B311A6B280DE9EC006BDACE /* Project object */;
 }
