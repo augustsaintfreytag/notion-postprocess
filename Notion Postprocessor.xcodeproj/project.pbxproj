@@ -68,7 +68,7 @@
 				8B311A76280DE9ED006BDACE /* Command.swift */,
 				8B311A87280EB49A006BDACE /* Arguments */,
 				8B311A83280EB004006BDACE /* Common */,
-				8B311A8A280EB4B9006BDACE /* Processors */,
+				8B311A8A280EB4B9006BDACE /* Processing */,
 			);
 			path = "Notion Postprocessor";
 			sourceTree = "<group>";
@@ -105,12 +105,12 @@
 			path = Errors;
 			sourceTree = "<group>";
 		};
-		8B311A8A280EB4B9006BDACE /* Processors */ = {
+		8B311A8A280EB4B9006BDACE /* Processing */ = {
 			isa = PBXGroup;
 			children = (
 				8B311A8B280EB4C0006BDACE /* Errors */,
 			);
-			path = Processors;
+			path = Processing;
 			sourceTree = "<group>";
 		};
 		8B311A8B280EB4C0006BDACE /* Errors */ = {
