@@ -5,6 +5,8 @@
 import Foundation
 
 protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
+
+	typealias CanonicalNameMap = [String: String]
 	
 	var dryRun: Bool { get }
 	
@@ -12,63 +14,114 @@ protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
 
 extension DocumentProcessor {
 	
-	func processAllDocuments(in directory: URL) throws {
-		let fileURLs = try documentFileURLs(in: directory)
-		
-		for fileURL in fileURLs {
-			try processDocumentAndAssociates(at: fileURL)
-		}
+	private var fileManager: FileManager { FileManager.default }
+	
+	func processDocuments(in directory: URL) throws {
+		let _ = try processDocumentsAndWriteMap(startingIn: directory)
 	}
 	
-	/// Takes the document at the given URL and determines its restorable name.
-	/// Further tries to locate an associate ("nested page") directory to be processed.
-	func processDocumentAndAssociates(at url: URL) throws {
-		assert(FileManager.default.fileExists(atPath: url.path), "File manager integrity assertion failed, can not determine own path.")
+	private func processDocumentsAndWriteMap(startingIn directory: URL) throws -> CanonicalNameMap {
+		var map = CanonicalNameMap()
+		let (documents, directories) = try fileURLs(in: directory)
 		
-		// Preparation
-		guard let canonicalDocumentName = try canonicalDocumentName(forDocumentAt: url) else {
-			throw ProcessingError(kind: .missingData, description: "Could not read canonical document name for file at path '\(url.path)'.")
+		for directory in directories {
+			let cachedDirectoryNames = try processDocumentsAndWriteMap(startingIn: directory)
+			map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		}
 		
-		let documentName = url.lastPathComponent
-		let associateDirectoryName = try documentName.removingMatches(matching: #"\.\w+$"#)
+		let cachedDirectoryNames = try indexDocumentNames(documents)
+		map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		
-		assert(documentName != associateDirectoryName, "Derived associate directory name transformation not valid; transform produced '\(associateDirectoryName)'.")
+		try documents.forEach { document in try rewriteAndRenameDocument(document, map: map) }
+		try directories.forEach { directory in try renameDirectory(directory, map: map) }
 		
-		let parentDirectoryURL = url.deletingLastPathComponent()
-		let associateDirectoryURL = parentDirectoryURL.appendingPathComponent(associateDirectoryName, isDirectory: true)
-		
-		let hasAssociateDirectory = FileManager.default.fileExists(atPath: associateDirectoryURL.path)
-		
-		// Execution
-		if dryRun {
-			print("Operations in path '\(parentDirectoryURL.path)':")
-			print("Document rename: '\(documentName)' → '\(canonicalDocumentName).md'")
-			
-			var documentContents = try documentContents(at: url)
-			documentContents = processDocumentContents(documentContents)
-			documentContents = rewriteDocumentResourceLinks(documentContents, names: (original: associateDirectoryName, canonical: canonicalDocumentName))
-			
-			print("Rewrite document to: \n\(documentContents)")
-			
-			if hasAssociateDirectory {
-				print("Directory rename: '\(associateDirectoryName)' → '\(canonicalDocumentName)'")
-			}
-		}
+		return map
 	}
+	
+	private func indexDocumentNames(_ documents: [URL]) throws -> CanonicalNameMap {
+		var map = CanonicalNameMap()
+		
+		for document in documents {
+			guard let names = try documentNames(document) else {
+				print("Could not determine canonical name for file '\(document.path)'.")
+				continue
+			}
+			
+			map[names.original] = names.canonical
+		}
+		
+		return map
+	}
+	
+	private func documentNames(_ document: URL) throws -> (original: String, canonical: String)? {
+		guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
+			return nil
+		}
+		
+		let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
+		return (originalDocumentName, canonicalDocumentName)
+	}
+	
+	private func rewriteAndRenameDocument(_ document: URL, map: CanonicalNameMap) throws {
+		var documentContents = try documentContents(at: document)
+		documentContents = rewrittenDocumentContents(documentContents)
+		documentContents = rewrittenDocumentResourceLinks(documentContents, map: map)
+		
+		guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
+			throw ProcessingError(kind: .missingData, description: "Could not determine canonical document name for '\(document.description)' to rewrite and rename.")
+		}
+		
+		try rewriteAndRenameDocument(document, newName: canonicalDocumentName, newContents: documentContents)
+	}
+	
+	private func rewriteAndRenameDocument(_ document: URL, newName: String, newContents: String) throws {
+		let newDocumentFileName = fileName(forCanonicalName: newName)
+		let newDocument = document.deletingLastPathComponent().appendingPathComponent(newDocumentFileName)
+		
+		guard !dryRun else {
+			print("Rename file '\(document.lastPathComponent)' to '\(newName)'.")
+			// print("Rewrite file contents '\(document.lastPathComponent)' to '\(newName)'.")
+			return
+		}
+		
+		try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
+		try fileManager.removeItem(at: document)
+	}
+	
+	private func renameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
+		let directoryName = directory.lastPathComponent
+		
+		guard let canonicalDirectoryName = map[directoryName] else {
+			throw ProcessingError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.description)' to rename.")
+		}
+		
+		try renameDirectory(directory, newName: canonicalDirectoryName)
+	}
+	
+	private func renameDirectory(_ directory: URL, newName: String) throws {
+		guard !dryRun else {
+			print("Rename directory '\(directory.lastPathComponent)' to '\(newName)'.")
+			return
+		}
+		
+		let movedDirectory = directory.deletingLastPathComponent().appendingPathComponent(newName, isDirectory: true)
+		try fileManager.moveItem(at: directory, to: movedDirectory)
+	}
+	
+	// MARK: Document Contents
 	
 	/// Reads and rewrites the document, applies transformations for destination format.
 	///
 	/// This function may perform the following:
 	///   - Detect callout blocks (beginning of line, emoji, text until newline)
-	func rewrittenDocumentContents(_ contents: String) -> String {
+	private func rewrittenDocumentContents(_ contents: String) -> String {
 		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
 			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
 	}
 	
 	/// Finds paths to resources inside the given document contents and rewrites
-	func rewrittenDocumentResourceLinks(_ contents: String, index: CanonicalNameIndex) -> String {
+	private func rewrittenDocumentResourceLinks(_ contents: String, map: CanonicalNameMap) -> String {
 		var paths: [(match: String, replacement: String)] = []
 		var rewrittenContents = contents
 		
@@ -80,7 +133,7 @@ extension DocumentProcessor {
 			
 			var rewrittenPath = path
 			
-			for (originalName, canonicalName) in index {
+			for (originalName, canonicalName) in map {
 				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
 			}
 			
@@ -91,11 +144,15 @@ extension DocumentProcessor {
 			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
 		}
 		
+		if dryRun {
+			print("Rewriting resource links: \(paths.map { match, replacement in "'\(match)' → '\(replacement)'" }).")
+		}
+		
 		return rewrittenContents
 	}
 	
 	private func forEachResourcePath(in contents: String, _ block: (_ matchedPathString: String, _ path: String) -> Void) {
-		let matches = try! contents.allMatchGroups(#"\[.+?]\((.+?)\)"#)
+		let matches = try! contents.allMatchGroups(#"\[.+?\]\((.+?)\)"#)
 		
 		for match in matches {
 			guard let matchedPathString = match[1], let path = matchedPathString.removingPercentEncoding else {
@@ -108,26 +165,40 @@ extension DocumentProcessor {
 	
 	// MARK: Name Indexing
 	
-	func indexCanonicalDocumentNames(in directory: URL) throws -> CanonicalNameIndex {
-		var cachedNames = CanonicalNameIndex()
+	private func indexCanonicalDocumentNames(in directory: URL) throws -> CanonicalNameMap {
+		var map = CanonicalNameMap()
 		let (documents, directories) = try fileURLs(in: directory)
 		
 		for directory in directories {
 			let cachedDirectoryNames = try indexCanonicalDocumentNames(in: directory)
-			cachedNames.merge(cachedDirectoryNames) { _, newKey in newKey }
+			map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		}
 		
 		for document in documents {
-			guard let canonicalDocumentName = try canonicalDocumentName(forDocumentAt: document) else {
+			guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
 				print("Could not determine canonical name for file '\(document.path)'.")
 				continue
 			}
 			
-			let originalDocumentName = try document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
-			cachedNames[originalDocumentName] = canonicalDocumentName
+			let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
+			map[originalDocumentName] = canonicalDocumentName
 		}
 		
-		return cachedNames
+		return map
+	}
+	
+	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
+		let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
+		
+		if let cachedName = map[originalDocumentName] {
+			return cachedName
+		}
+		
+		return try canonicalDocumentName(for: document)
+	}
+	
+	private func fileName(forCanonicalName canonicalName: String) -> String {
+		return canonicalName + ".md"
 	}
 	
 }

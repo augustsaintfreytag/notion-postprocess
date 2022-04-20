@@ -26,8 +26,8 @@ struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
 	// MARK: Run
 	
 	func run() throws {
-		let inputURL = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
-		try processAllDocuments(in: inputURL)
+		let directory = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
+		try processDocuments(in: directory)
 	}
 	
 }

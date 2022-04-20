@@ -11,8 +11,8 @@ extension DocumentNameProvider {
 	private var firstHeadingMatchPattern: String { #"# (.+)\n"# }
 	
 	/// Reads the document at the given URL and returns its canonical name if possible.
-	func canonicalDocumentName(forDocumentAt fileURL: URL) throws -> String? {
-		let contents = try documentContents(at: fileURL)
+	func canonicalDocumentName(for document: URL) throws -> String? {
+		let contents = try documentContents(at: document)
 		return documentName(fromFileContents: contents)
 	}
 	
