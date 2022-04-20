@@ -62,8 +62,6 @@ extension DocumentProcessor {
 	/// This function may perform the following:
 	///   - Detect callout blocks (beginning of line, emoji, text until newline)
 	func rewrittenDocumentContents(_ contents: String) -> String {
-	// MARK: Document Contents
-	
 		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
 			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
@@ -101,6 +99,30 @@ extension DocumentProcessor {
 		}
 		
 		return rewrittenContents
+	}
+	
+	// MARK: Name Indexing
+	
+	func indexCanonicalDocumentNames(in directory: URL) throws -> CanonicalNameIndex {
+		var cachedNames = CanonicalNameIndex()
+		let (documents, directories) = try fileURLs(in: directory)
+		
+		for directory in directories {
+			let cachedDirectoryNames = try indexCanonicalDocumentNames(in: directory)
+			cachedNames.merge(cachedDirectoryNames) { _, newKey in newKey }
+		}
+		
+		for document in documents {
+			guard let canonicalDocumentName = try canonicalDocumentName(forDocumentAt: document) else {
+				print("Could not determine canonical name for file '\(document.path)'.")
+				continue
+			}
+			
+			let originalDocumentName = try document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
+			cachedNames[originalDocumentName] = canonicalDocumentName
+		}
+		
+		return cachedNames
 	}
 	
 }
