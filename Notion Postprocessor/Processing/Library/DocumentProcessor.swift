@@ -146,7 +146,10 @@ extension DocumentProcessor {
 				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
 			}
 			
-			paths.append((matchedPathString, rewrittenPath))
+			paths.append((
+				match: matchedPathString,
+				replacement: rewrittenPath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
+			))
 		}
 		
 		for (match, replacement) in paths {
