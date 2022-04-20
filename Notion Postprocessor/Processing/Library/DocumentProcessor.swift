@@ -9,6 +9,7 @@ protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
 	typealias CanonicalNameMap = [String: String]
 	
 	var dryRun: Bool { get }
+	var profile: PerformanceProfile { get }
 	
 }
 
@@ -29,37 +30,46 @@ extension DocumentProcessor {
 			map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		}
 		
-		let cachedDirectoryNames = try indexDocumentNames(documents)
+		let cachedDirectoryNames = try indexDocumentNames(documents, map: map)
 		map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		
-		try documents.forEach { document in try rewriteAndRenameDocument(document, map: map) }
-		try directories.forEach { directory in try renameDirectory(directory, map: map) }
+		try documents.forEach { document in
+			try rewriteAndRenameDocument(document, map: map)
+			profile.tick("documentProcessed")
+		}
+		
+		try directories.forEach { directory in
+			try renameDirectory(directory, map: map)
+			profile.tick("directoryProcessed")
+		}
 		
 		return map
 	}
 	
-	private func indexDocumentNames(_ documents: [URL]) throws -> CanonicalNameMap {
+	/// Indexes canonical names for all given documents and returns a map.
+	/// Skips all names already defined in the provided map.
+	private func indexDocumentNames(_ documents: [URL], map existingMap: CanonicalNameMap) throws -> CanonicalNameMap {
 		var map = CanonicalNameMap()
 		
 		for document in documents {
-			guard let names = try documentNames(document) else {
-				print("Could not determine canonical name for file '\(document.path)'.")
+			let originalDocumentName = fileNameWithoutExtension(from: document)
+			
+			guard !existingMap.keys.contains(originalDocumentName), !map.keys.contains(originalDocumentName) else {
+				profile.tick("duplicateNameIndexSkipped")
 				continue
 			}
 			
-			map[names.original] = names.canonical
+			guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
+				print("Could not determine canonical name for file '\(document.path)'.")
+				profile.tick("documentNameNotIndexed")
+				continue
+			}
+			
+			map[originalDocumentName] = canonicalDocumentName
+			profile.tick("documentNameIndexed")
 		}
 		
 		return map
-	}
-	
-	private func documentNames(_ document: URL) throws -> (original: String, canonical: String)? {
-		guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
-			return nil
-		}
-		
-		let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
-		return (originalDocumentName, canonicalDocumentName)
 	}
 	
 	private func rewriteAndRenameDocument(_ document: URL, map: CanonicalNameMap) throws {
@@ -79,8 +89,7 @@ extension DocumentProcessor {
 		let newDocument = document.deletingLastPathComponent().appendingPathComponent(newDocumentFileName)
 		
 		guard !dryRun else {
-			print("Rename file '\(document.lastPathComponent)' to '\(newName)'.")
-			// print("Rewrite file contents '\(document.lastPathComponent)' to '\(newName)'.")
+			print("Rename file '\(document.lastPathComponent)' to '\(newDocumentFileName)'.")
 			return
 		}
 		
@@ -165,36 +174,13 @@ extension DocumentProcessor {
 	
 	// MARK: Name Indexing
 	
-	private func indexCanonicalDocumentNames(in directory: URL) throws -> CanonicalNameMap {
-		var map = CanonicalNameMap()
-		let (documents, directories) = try fileURLs(in: directory)
-		
-		for directory in directories {
-			let cachedDirectoryNames = try indexCanonicalDocumentNames(in: directory)
-			map.merge(cachedDirectoryNames) { _, newKey in newKey }
-		}
-		
-		for document in documents {
-			guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
-				print("Could not determine canonical name for file '\(document.path)'.")
-				continue
-			}
-			
-			let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
-			map[originalDocumentName] = canonicalDocumentName
-		}
-		
-		return map
+	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
+		let originalDocumentName = fileNameWithoutExtension(from: document)
+		return map[originalDocumentName]
 	}
 	
-	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
-		let originalDocumentName = try! document.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
-		
-		if let cachedName = map[originalDocumentName] {
-			return cachedName
-		}
-		
-		return try canonicalDocumentName(for: document)
+	private func fileNameWithoutExtension(from file: URL) -> String {
+		return try! file.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
 	}
 	
 	private func fileName(forCanonicalName canonicalName: String) -> String {
