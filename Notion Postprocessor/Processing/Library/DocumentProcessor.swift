@@ -126,7 +126,10 @@ extension DocumentProcessor {
 	private func rewrittenDocumentContents(_ contents: String) -> String {
 		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
-			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
+			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "$1")
+			.replacingOccurrences(of: "```js", with: "```javascript")
+			.replacingOccurrences(of: "```ts", with: "```typescript")
+			.replacingOccurrences(of: "```tsx", with: "```typescript")
 	}
 	
 	/// Finds paths to resources inside the given document contents and rewrites
