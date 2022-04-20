@@ -14,8 +14,9 @@ import ArgumentParser
 /// - Correct name (read top level heading in `.md` file)
 ///
 
-@main
-struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
+@main struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
+	
+	// MARK: Parameters
 	
 	@Argument(help: "Path to the directory exported from Notion to be processed.", completion: CompletionKind.directory)
 	var inputPath: String
@@ -23,11 +24,40 @@ struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
 	@Flag(help: "Prints out the changes that would be made to the input directory and its files but does not execute them.")
 	var dryRun: Bool = false
 	
+	// MARK: State
+	
+	var profile = PerformanceProfile()
+	
 	// MARK: Run
 	
 	func run() throws {
 		let directory = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
 		try processDocuments(in: directory)
+		
+		print(profile.counts)
+	}
+	
+}
+
+extension NotionPostprocessor {
+	
+	enum CodingKeys: CodingKey {
+		case inputPath
+		case dryRun
+	}
+	
+}
+
+class PerformanceProfile: Codable {
+	
+	private(set) var counts: [String: Int] = [:]
+	
+	func tick(_ key: String) {
+		counts[key] = count(for: key) + 1
+	}
+	
+	func count(for key: String) -> Int {
+		return counts[key] ?? 0
 	}
 	
 }
