@@ -61,14 +61,16 @@ extension DocumentProcessor {
 	///
 	/// This function may perform the following:
 	///   - Detect callout blocks (beginning of line, emoji, text until newline)
-	func processDocumentContents(_ contents: String) -> String {
+	func rewrittenDocumentContents(_ contents: String) -> String {
+	// MARK: Document Contents
+	
 		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
 			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
 	}
 	
 	/// Finds paths to resources inside the given document contents and rewrites
-	func rewriteDocumentResourceLinks(_ contents: String, names: (original: String, canonical: String)) -> String {
+	func rewrittenDocumentResourceLinks(_ contents: String, index: CanonicalNameIndex) -> String {
 		// return try! contents.replacingOccurrences(of: names.original, with: names.canonical)
 		let matches = try! contents.allMatchGroups(#"\[.+?]\((.+?)\)"#)
 		var paths: [(match: String, replacement: String)] = []
@@ -83,7 +85,12 @@ extension DocumentProcessor {
 				continue
 			}
 			
-			let rewrittenPath = originalPath.replacingOccurrences(of: names.original, with: names.canonical)
+			var rewrittenPath = originalPath
+			
+			for (originalName, canonicalName) in index {
+				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
+			}
+			
 			paths.append((String(matchedPathString), rewrittenPath))
 		}
 		
