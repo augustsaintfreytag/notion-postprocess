@@ -12,6 +12,8 @@
 		8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A80280DF6B9006BDACE /* ArgumentError.swift */; };
 		8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A85280EB021006BDACE /* String+RegularExpression.swift */; };
 		8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A8C280EB4E8006BDACE /* ProcessingError.swift */; };
+		8B311A92280FFC52006BDACE /* FileReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A91280FFC52006BDACE /* FileReader.swift */; };
+		8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -32,6 +34,8 @@
 		8B311A80280DF6B9006BDACE /* ArgumentError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArgumentError.swift; sourceTree = "<group>"; };
 		8B311A85280EB021006BDACE /* String+RegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegularExpression.swift"; sourceTree = "<group>"; };
 		8B311A8C280EB4E8006BDACE /* ProcessingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingError.swift; sourceTree = "<group>"; };
+		8B311A91280FFC52006BDACE /* FileReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReader.swift; sourceTree = "<group>"; };
+		8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryEnumerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,7 @@
 				8B311A76280DE9ED006BDACE /* Command.swift */,
 				8B311A87280EB49A006BDACE /* Arguments */,
 				8B311A83280EB004006BDACE /* Common */,
+				8B311A93280FFC70006BDACE /* Files */,
 				8B311A8A280EB4B9006BDACE /* Processing */,
 			);
 			path = "Notion Postprocessor";
@@ -125,6 +130,23 @@
 		8B311A8E280F2FB3006BDACE /* Library */ = {
 			isa = PBXGroup;
 			children = (
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		8B311A93280FFC70006BDACE /* Files */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A94280FFC7F006BDACE /* Library */,
+			);
+			path = Files;
+			sourceTree = "<group>";
+		};
+		8B311A94280FFC7F006BDACE /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */,
+				8B311A91280FFC52006BDACE /* FileReader.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -196,7 +218,9 @@
 				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
 				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
 				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
+				8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */,
 				8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */,
+				8B311A92280FFC52006BDACE /* FileReader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

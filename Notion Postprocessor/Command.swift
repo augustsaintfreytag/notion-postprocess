@@ -60,10 +60,10 @@ extension DocumentProcessor {
 			throw ProcessingError(kind: .missingData, description: "Could not read canonical document name for file at path '\(url.path)'.")
 		}
 		
-		let fileName = url.lastPathComponent
-		let associateDirectoryName = try fileName.removingMatches(matching: #"\.\w+$"#)
+		let documentName = url.lastPathComponent
+		let associateDirectoryName = try documentName.removingMatches(matching: #"\.\w+$"#)
 		
-		assert(fileName != associateDirectoryName, "Derived associate directory name transformation not valid; transform produced '\(associateDirectoryName)'.")
+		assert(documentName != associateDirectoryName, "Derived associate directory name transformation not valid; transform produced '\(associateDirectoryName)'.")
 		
 		let parentDirectoryURL = url.deletingLastPathComponent()
 		let associateDirectoryURL = parentDirectoryURL.appendingPathComponent(associateDirectoryName, isDirectory: true)
@@ -73,9 +73,11 @@ extension DocumentProcessor {
 		// Execution
 		if dryRun {
 			print("Operations in path '\(parentDirectoryURL.path)':")
-			print("Document rename: '\(fileName)' → '\(canonicalDocumentName).md'")
+			print("Document rename: '\(documentName)' → '\(canonicalDocumentName).md'")
 			
-			let documentContents = try processDocumentContents(documentContents(at: url))
+			var documentContents = try documentContents(at: url)
+			documentContents = processDocumentContents(documentContents)
+			
 			print("Rewrite document to: \n\(documentContents)")
 			
 			if hasAssociateDirectory {
@@ -88,33 +90,17 @@ extension DocumentProcessor {
 	///
 	/// This function may perform the following:
 	///   - Detect callout blocks (beginning of line, emoji, text until newline)
-	func processDocumentContents(_ contents: String) throws -> String {
-		return try contents
+	func processDocumentContents(_ contents: String) -> String {
+		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
 			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
 	}
 	
 }
 
-// MARK: Enumeration
-
-protocol DirectoryEnumerator {}
-
-extension DirectoryEnumerator {
-	
-	func documentFileURLs(in directory: URL) throws -> [URL] {
-		let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [], options: [.skipsHiddenFiles])
-		
-		return fileURLs.filter { url in
-			url.lastPathComponent.contains(".md")
-		}
-	}
-	
-}
-
 // MARK: Document Names
 
-protocol DocumentNameProvider: DocumentReader {}
+protocol DocumentNameProvider: FileReader {}
 
 extension DocumentNameProvider {
 	
@@ -136,22 +122,6 @@ extension DocumentNameProvider {
 		}
 		
 		return String(headingSubstring).trimmingCharacters(in: .whitespacesAndNewlines)
-	}
-	
-}
-
-protocol DocumentReader {}
-
-extension DocumentReader {
-	
-	func documentContents(at url: URL) throws -> String {
-		let fileData = try Data(contentsOf: url)
-		
-		guard let fileContents = String(data: fileData, encoding: .utf8) else {
-			throw ProcessingError(kind: .unreadableData, description: "Could not decode document data to string.")
-		}
-		
-		return fileContents
 	}
 	
 }
