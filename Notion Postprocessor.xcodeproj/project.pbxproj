@@ -14,6 +14,8 @@
 		8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A8C280EB4E8006BDACE /* ProcessingError.swift */; };
 		8B311A92280FFC52006BDACE /* FileReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A91280FFC52006BDACE /* FileReader.swift */; };
 		8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */; };
+		8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9728100E8E006BDACE /* DocumentProcessor.swift */; };
+		8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +38,8 @@
 		8B311A8C280EB4E8006BDACE /* ProcessingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingError.swift; sourceTree = "<group>"; };
 		8B311A91280FFC52006BDACE /* FileReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReader.swift; sourceTree = "<group>"; };
 		8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryEnumerator.swift; sourceTree = "<group>"; };
+		8B311A9728100E8E006BDACE /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
+		8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentNameProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,6 +134,8 @@
 		8B311A8E280F2FB3006BDACE /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */,
+				8B311A9728100E8E006BDACE /* DocumentProcessor.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -215,10 +221,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */,
 				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
 				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
 				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
 				8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */,
+				8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */,
 				8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */,
 				8B311A92280FFC52006BDACE /* FileReader.swift in Sources */,
 			);
