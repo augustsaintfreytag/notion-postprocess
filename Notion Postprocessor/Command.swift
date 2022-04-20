@@ -15,7 +15,7 @@ import ArgumentParser
 ///
 
 @main
-struct NotionPostprocessor: ParsableCommand, DirectoryEnumerator, DocumentNameProvider {
+struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
 	
 	@Argument(help: "Path to the directory exported from Notion to be processed.", completion: CompletionKind.directory)
 	var inputPath: String
@@ -30,7 +30,17 @@ struct NotionPostprocessor: ParsableCommand, DirectoryEnumerator, DocumentNamePr
 		try processAllDocuments(in: inputURL)
 	}
 	
-	// MARK: Processing (TBD)
+}
+
+// MARK: File Contents
+
+protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
+	
+	var dryRun: Bool { get }
+	
+}
+
+extension DocumentProcessor {
 	
 	func processAllDocuments(in directory: URL) throws {
 		let fileURLs = try documentFileURLs(in: directory)
@@ -65,10 +75,23 @@ struct NotionPostprocessor: ParsableCommand, DirectoryEnumerator, DocumentNamePr
 			print("Operations in path '\(parentDirectoryURL.path)':")
 			print("Document rename: '\(fileName)' → '\(canonicalDocumentName).md'")
 			
+			let documentContents = try processDocumentContents(documentContents(at: url))
+			print("Rewrite document to: \n\(documentContents)")
+			
 			if hasAssociateDirectory {
 				print("Directory rename: '\(associateDirectoryName)' → '\(canonicalDocumentName)'")
 			}
 		}
+	}
+	
+	/// Reads and rewrites the document, applies transformations for destination format.
+	///
+	/// This function may perform the following:
+	///   - Detect callout blocks (beginning of line, emoji, text until newline)
+	func processDocumentContents(_ contents: String) throws -> String {
+		return try contents
+			.removingMatches(matching: #"^# .+?\n\s+"#)
+			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
 	}
 	
 }
@@ -91,7 +114,7 @@ extension DirectoryEnumerator {
 
 // MARK: Document Names
 
-protocol DocumentNameProvider {}
+protocol DocumentNameProvider: DocumentReader {}
 
 extension DocumentNameProvider {
 	
@@ -99,13 +122,8 @@ extension DocumentNameProvider {
 	
 	/// Reads the document at the given URL and returns its canonical name if possible.
 	func canonicalDocumentName(forDocumentAt fileURL: URL) throws -> String? {
-		let fileData = try Data(contentsOf: fileURL)
-		
-		guard let fileContents = String(data: fileData, encoding: .utf8) else {
-			return nil
-		}
-		
-		return documentName(fromFileContents: fileContents)
+		let contents = try documentContents(at: fileURL)
+		return documentName(fromFileContents: contents)
 	}
 	
 	/// Extracts the first found (first level) heading from the given document contents 
@@ -118,6 +136,22 @@ extension DocumentNameProvider {
 		}
 		
 		return String(headingSubstring).trimmingCharacters(in: .whitespacesAndNewlines)
+	}
+	
+}
+
+protocol DocumentReader {}
+
+extension DocumentReader {
+	
+	func documentContents(at url: URL) throws -> String {
+		let fileData = try Data(contentsOf: url)
+		
+		guard let fileContents = String(data: fileData, encoding: .utf8) else {
+			throw ProcessingError(kind: .unreadableData, description: "Could not decode document data to string.")
+		}
+		
+		return fileContents
 	}
 	
 }

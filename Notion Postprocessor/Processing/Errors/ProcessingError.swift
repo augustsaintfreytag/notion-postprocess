@@ -19,6 +19,7 @@ struct ProcessingError: LocalizedError {
 extension ProcessingError {
 	
 	enum Kind: String {
+		case unreadableData
 		case missingData
 		case invalidStructure
 	}

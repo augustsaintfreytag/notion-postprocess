@@ -108,6 +108,7 @@
 		8B311A8A280EB4B9006BDACE /* Processing */ = {
 			isa = PBXGroup;
 			children = (
+				8B311A8E280F2FB3006BDACE /* Library */,
 				8B311A8B280EB4C0006BDACE /* Errors */,
 			);
 			path = Processing;
@@ -119,6 +120,13 @@
 				8B311A8C280EB4E8006BDACE /* ProcessingError.swift */,
 			);
 			path = Errors;
+			sourceTree = "<group>";
+		};
+		8B311A8E280F2FB3006BDACE /* Library */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
