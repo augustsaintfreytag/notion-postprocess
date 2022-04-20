@@ -16,25 +16,44 @@ extension String {
 		NSRange(fullRange, in: self)
 	}
 	
-	// MARK: Pattern In
+	// MARK: Pattern In (Capture Groups)
 	
 	public func firstMatchGroups(_ pattern: String, expressionOptions: NSRegularExpression.Options = [], matchingOptions: NSRegularExpression.MatchingOptions = []) throws -> [Int: Substring]? {
 		let expression = try NSRegularExpression(pattern: pattern, options: expressionOptions)
 		
-		guard let results = expression.firstMatch(in: self, options: matchingOptions, range: fullMatchingRange) else {
+		guard let result = expression.firstMatch(in: self, options: matchingOptions, range: fullMatchingRange) else {
 			return nil
 		}
 		
+		return indexedMatchGroups(from: result)
+	}
+	
+	public func allMatchGroups(_ pattern: String, expressionOptions: NSRegularExpression.Options = [], matchingOptions: NSRegularExpression.MatchingOptions = []) throws -> [[Int: Substring]] {
+		let expression = try NSRegularExpression(pattern: pattern, options: expressionOptions)
+		let results = expression.matches(in: self, options: matchingOptions, range: fullMatchingRange)
+
+		var matchGroups: [[Int: Substring]] = []
+		
+		for result in results {
+			matchGroups.append(indexedMatchGroups(from: result))
+		}
+		
+		return matchGroups
+	}
+	
+	private func indexedMatchGroups(from result: NSTextCheckingResult) -> [Int: Substring] {
 		var substrings: [Int: Substring] = [:]
 		
-		for index in 0 ..< results.numberOfRanges {
-			let range = Range(results.range(at: index), in: self)!
+		for index in 0 ..< result.numberOfRanges {
+			let range = Range(result.range(at: index), in: self)!
 			let substring = self[range]
 			substrings[index] = substring
 		}
 		
 		return substrings
 	}
+	
+	// MARK: Pattern In (Whole Matches)
 	
 	/// Returns a match of the string against the given regular expression pattern.
 	public func matches(_ pattern: String, expressionOptions: NSRegularExpression.Options = [], matchingOptions: NSRegularExpression.MatchingOptions = []) throws -> Bool {
