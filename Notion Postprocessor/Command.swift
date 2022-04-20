@@ -77,6 +77,7 @@ extension DocumentProcessor {
 			
 			var documentContents = try documentContents(at: url)
 			documentContents = processDocumentContents(documentContents)
+			documentContents = rewriteDocumentResourceLinks(documentContents, names: (original: associateDirectoryName, canonical: canonicalDocumentName))
 			
 			print("Rewrite document to: \n\(documentContents)")
 			
@@ -94,6 +95,35 @@ extension DocumentProcessor {
 		return try! contents
 			.removingMatches(matching: #"^# .+?\n\s+"#)
 			.replacingMatches(matching: #"<aside>\s*(.+?)\s*</aside>"#, with: "> $1")
+	}
+	
+	/// Finds paths to resources inside the given document contents and rewrites
+	func rewriteDocumentResourceLinks(_ contents: String, names: (original: String, canonical: String)) -> String {
+		// return try! contents.replacingOccurrences(of: names.original, with: names.canonical)
+		let matches = try! contents.allMatchGroups(#"\[.+?]\((.+?)\)"#)
+		var paths: [(match: String, replacement: String)] = []
+		
+		for match in matches {
+			guard let matchedPathString = match[1], let originalPath = matchedPathString.removingPercentEncoding else {
+				continue
+			}
+			
+			// Skip external paths
+			guard !originalPath.contains("http") else {
+				continue
+			}
+			
+			let rewrittenPath = originalPath.replacingOccurrences(of: names.original, with: names.canonical)
+			paths.append((String(matchedPathString), rewrittenPath))
+		}
+		
+		var rewrittenContents = contents
+		
+		for (match, replacement) in paths {
+			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
+		}
+		
+		return rewrittenContents
 	}
 	
 }
