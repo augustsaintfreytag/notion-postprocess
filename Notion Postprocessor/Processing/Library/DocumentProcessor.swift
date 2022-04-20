@@ -69,36 +69,41 @@ extension DocumentProcessor {
 	
 	/// Finds paths to resources inside the given document contents and rewrites
 	func rewrittenDocumentResourceLinks(_ contents: String, index: CanonicalNameIndex) -> String {
-		// return try! contents.replacingOccurrences(of: names.original, with: names.canonical)
-		let matches = try! contents.allMatchGroups(#"\[.+?]\((.+?)\)"#)
 		var paths: [(match: String, replacement: String)] = []
+		var rewrittenContents = contents
 		
-		for match in matches {
-			guard let matchedPathString = match[1], let originalPath = matchedPathString.removingPercentEncoding else {
-				continue
-			}
-			
+		forEachResourcePath(in: contents) { matchedPathString, path in
 			// Skip external paths
-			guard !originalPath.contains("http") else {
-				continue
+			guard !path.contains("http") else {
+				return
 			}
 			
-			var rewrittenPath = originalPath
+			var rewrittenPath = path
 			
 			for (originalName, canonicalName) in index {
 				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
 			}
 			
-			paths.append((String(matchedPathString), rewrittenPath))
+			paths.append((matchedPathString, rewrittenPath))
 		}
-		
-		var rewrittenContents = contents
 		
 		for (match, replacement) in paths {
 			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
 		}
 		
 		return rewrittenContents
+	}
+	
+	private func forEachResourcePath(in contents: String, _ block: (_ matchedPathString: String, _ path: String) -> Void) {
+		let matches = try! contents.allMatchGroups(#"\[.+?]\((.+?)\)"#)
+		
+		for match in matches {
+			guard let matchedPathString = match[1], let path = matchedPathString.removingPercentEncoding else {
+				continue
+			}
+			
+			block(String(matchedPathString), path)
+		}
 	}
 	
 	// MARK: Name Indexing
