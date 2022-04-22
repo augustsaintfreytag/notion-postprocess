@@ -8,11 +8,16 @@ protocol DirectoryEnumerator {}
 
 extension DirectoryEnumerator {
 	
-	func fileURLs(in directory: URL) throws -> (documents: [URL], directories: [URL]) {
-		let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [], options: [.skipsHiddenFiles])
+	private var fileManager: FileManager { FileManager.default }
+	
+	func fileURLs(in directory: URL) throws -> (directories: [URL], documents: [URL], tables: [URL]) {
+		let fileURLs = try fileManager
+			.contentsOfDirectory(at: directory, includingPropertiesForKeys: [], options: [.skipsHiddenFiles])
+			.sorted(by: { lhs, rhs in lhs.lastPathComponent < rhs.lastPathComponent })
 		
-		var documentURLs: [URL] = []
 		var directoryURLs: [URL] = []
+		var documentURLs: [URL] = []
+		var tableURLs: [URL] = []
 		
 		for url in fileURLs {
 			if urlIsDirectory(url) {
@@ -24,18 +29,27 @@ extension DirectoryEnumerator {
 				documentURLs.append(url)
 				continue
 			}
+			
+			if urlIsTable(url) {
+				tableURLs.append(url)
+				continue
+			}
 		}
 		
-		return (documentURLs, directoryURLs)
+		return (directoryURLs, documentURLs, tableURLs)
 	}
 	
 	func documentFileURLs(in directory: URL) throws -> [URL] {
-		let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: [], options: [.skipsHiddenFiles])
+		let fileURLs = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: [], options: [.skipsHiddenFiles])
 		return fileURLs.filter { url in urlIsDocument(url) }
 	}
 	
 	private func urlIsDirectory(_ url: URL) -> Bool {
 		return url.hasDirectoryPath
+	}
+	
+	private func urlIsTable(_ url: URL) -> Bool {
+		return url.lastPathComponent.contains(".csv")
 	}
 	
 	private func urlIsDocument(_ url: URL) -> Bool {

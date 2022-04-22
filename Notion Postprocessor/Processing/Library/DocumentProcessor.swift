@@ -25,22 +25,28 @@ extension DocumentProcessor {
 	
 	private func processDocumentsAndWriteMap(startingIn directory: URL) throws -> CanonicalNameMap {
 		var map = CanonicalNameMap()
-		let (documents, directories) = try fileURLs(in: directory)
+		let (directories, documents, tables) = try fileURLs(in: directory)
 		
 		for directory in directories {
 			let cachedDirectoryNames = try processDocumentsAndWriteMap(startingIn: directory)
 			map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		}
 		
-		let cachedDirectoryNames = try indexDocumentNames(documents, map: map)
+		let cachedDocumentNames = try indexDocumentNames(documents, map: map)
+		map.merge(cachedDocumentNames) { _, newKey in newKey }
+		
+		let cachedTableNames = indexProvisoryFileName(tables, map: map)
+		map.merge(cachedTableNames) { _, newKey in newKey }
+		
+		let cachedDirectoryNames = indexProvisoryFileName(directories, map: map)
 		map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		
-		try documents.forEach { document in
+		for document in documents {
 			try rewriteAndRenameDocument(document, map: map)
 			profile.tick("documentProcessed")
 		}
 		
-		try directories.forEach { directory in
+		for directory in directories {
 			try renameDirectory(directory, map: map)
 			profile.tick("directoryProcessed")
 		}
@@ -75,6 +81,38 @@ extension DocumentProcessor {
 		return map
 	}
 	
+	private var provisoryFileNameAppendix: String { "(Migrated)" }
+	
+	/// Index a provisory name for all given files or directories.
+	///
+	/// Generic indexing function that can be used with either directories or other
+	/// loose files (e.g. exported table data). Only indexes a derived provisory name
+	/// from the file name itself and append "(Migrated)" to indicate the makeshift
+	/// nature of the set name.
+	private func indexProvisoryFileName(_ files: [URL], map existingMap: CanonicalNameMap) -> CanonicalNameMap {
+		var map = CanonicalNameMap()
+		
+		for file in files {
+			let originalFileName = fileNameWithoutExtension(from: file)
+			let provisoryFileName = try! originalFileName.removingMatches(matching: #"\s[0-9a-f]{5}"#)
+			
+			guard !provisoryFileName.contains(provisoryFileNameAppendix) else {
+				profile.tick("duplicateNameIndexSkipped")
+				continue
+			}
+			
+			guard !existingMap.keys.contains(originalFileName), !map.keys.contains(originalFileName) else {
+				profile.tick("duplicateNameIndexSkipped")
+				continue
+			}
+			
+			map[originalFileName] = "\(provisoryFileName) \(provisoryFileNameAppendix)"
+			profile.tick("provisoryNameIndexed")
+		}
+		
+		return map
+	}
+	
 	private func canonicalDocumentNameWithFallback(for document: URL) throws -> String? {
 		if let canonicalDocumentName = try canonicalDocumentName(for: document) {
 			profile.tick("documentNameReadFromContents")
@@ -85,7 +123,7 @@ extension DocumentProcessor {
 		
 		let originalDocumentName = fileNameWithoutExtension(from: document)
 		
-		if try! originalDocumentName.matches(#"\s[0-9a-f]{5}.md"#) == false {
+		if try! originalDocumentName.matches(#"\s[0-9a-f]{5}"#) == false {
 			let canonicalDocumentName = fileNameWithoutExtension(from: originalDocumentName)
 			print("Recovering document name from file as '\(canonicalDocumentName)', preserved by exporter.")
 			profile.tick("documentNameReadFromPreservedName")
@@ -119,8 +157,17 @@ extension DocumentProcessor {
 			return
 		}
 		
-		try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
-		try fileManager.removeItem(at: document)
+		do {
+			try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
+		} catch {
+			throw FileError(description: "Could not write renamed document '\(newDocument.lastPathComponent)' to disk (at '\(newDocument.path)'). \(error.localizedDescription)")
+		}
+		
+		do {
+			try fileManager.removeItem(at: document)
+		} catch {
+			throw FileError(description: "Could not remove document '\(document.lastPathComponent)' (at '\(document.path)'). \(error.localizedDescription)")
+		}
 	}
 	
 	private func renameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
@@ -140,7 +187,12 @@ extension DocumentProcessor {
 		}
 		
 		let movedDirectory = directory.deletingLastPathComponent().appendingPathComponent(newName, isDirectory: true)
-		try fileManager.moveItem(at: directory, to: movedDirectory)
+		
+		do {
+			try fileManager.moveItem(at: directory, to: movedDirectory)
+		} catch {
+			throw FileError(description: "Could not rename directory '\(directory.lastPathComponent)' to '\(movedDirectory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
+		}
 	}
 	
 	// MARK: Document Contents
