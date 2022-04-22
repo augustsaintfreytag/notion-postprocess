@@ -8,7 +8,7 @@ protocol DocumentNameProvider: FileReader {}
 
 extension DocumentNameProvider {
 	
-	private var firstHeadingMatchPattern: String { #"# (.+)\n"# }
+	private var firstHeadingMatchPattern: String { #"# (.+)\n?"# }
 	
 	/// Reads the document at the given URL and returns its canonical name if possible.
 	func canonicalDocumentName(for document: URL) throws -> String? {
