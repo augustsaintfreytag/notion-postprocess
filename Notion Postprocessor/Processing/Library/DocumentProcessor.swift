@@ -25,22 +25,28 @@ extension DocumentProcessor {
 	
 	private func processDocumentsAndWriteMap(startingIn directory: URL) throws -> CanonicalNameMap {
 		var map = CanonicalNameMap()
-		let (documents, directories) = try fileURLs(in: directory)
+		let (directories, documents, tables) = try fileURLs(in: directory)
 		
 		for directory in directories {
 			let cachedDirectoryNames = try processDocumentsAndWriteMap(startingIn: directory)
 			map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		}
 		
-		let cachedDirectoryNames = try indexDocumentNames(documents, map: map)
+		let cachedDocumentNames = try indexDocumentNames(documents, map: map)
+		map.merge(cachedDocumentNames) { _, newKey in newKey }
+		
+		let cachedTableNames = indexProvisoryFileName(tables, map: map)
+		map.merge(cachedTableNames) { _, newKey in newKey }
+		
+		let cachedDirectoryNames = indexProvisoryFileName(directories, map: map)
 		map.merge(cachedDirectoryNames) { _, newKey in newKey }
 		
-		try documents.forEach { document in
+		for document in documents {
 			try rewriteAndRenameDocument(document, map: map)
 			profile.tick("documentProcessed")
 		}
 		
-		try directories.forEach { directory in
+		for directory in directories {
 			try renameDirectory(directory, map: map)
 			profile.tick("directoryProcessed")
 		}
