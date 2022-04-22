@@ -78,7 +78,7 @@ extension DocumentProcessor {
 		documentContents = rewrittenDocumentResourceLinks(documentContents, map: map)
 		
 		guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
-			throw ProcessingError(kind: .missingData, description: "Could not determine canonical document name for '\(document.description)' to rewrite and rename.")
+			throw ProcessingError(kind: .missingData, description: "Could not determine canonical document name for '\(document.lastPathComponent)' (at '\(document.description)') to rewrite and rename.")
 		}
 		
 		try rewriteAndRenameDocument(document, newName: canonicalDocumentName, newContents: documentContents)
@@ -101,7 +101,7 @@ extension DocumentProcessor {
 		let directoryName = directory.lastPathComponent
 		
 		guard let canonicalDirectoryName = map[directoryName] else {
-			throw ProcessingError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.description)' to rename.")
+			throw ProcessingError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.lastPathComponent)' (at '\(directory.description)') to rename.")
 		}
 		
 		try renameDirectory(directory, newName: canonicalDirectoryName)
