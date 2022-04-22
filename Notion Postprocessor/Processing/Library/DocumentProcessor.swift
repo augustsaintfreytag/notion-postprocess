@@ -269,13 +269,10 @@ extension DocumentProcessor {
 	
 	/// Finds paths to resources inside the given document contents and rewrites
 	private func rewrittenDocumentResourceLinks(_ contents: String, map: CanonicalNameMap) -> String {
-		var paths: [(match: String, replacement: String)] = []
-		var rewrittenContents = contents
-		
-		forEachResourcePath(in: contents) { matchedPathString, path in
+		return rewriteResourcePaths(in: contents) { path in
 			// Skip external paths
 			guard !path.contains("http") else {
-				return
+				return nil
 			}
 			
 			var rewrittenPath = path
@@ -284,18 +281,31 @@ extension DocumentProcessor {
 				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
 			}
 			
+			if dryRun {
+				print("Rewriting resource link '\(path)' → '\(rewrittenPath)'.")
+			}
+			
+			return rewrittenPath
+		}
+	}
+	
+	private func rewriteResourcePaths(in contents: String, block: (_ path: String) -> String?) -> String {
+		var paths: [(match: String, replacement: String)] = []
+		var rewrittenContents = contents
+		
+		forEachResourcePath(in: contents) { matchedEncodedPath, path in
+			guard let rewrittenPath = block(path) else {
+				return
+			}
+			
 			paths.append((
-				match: matchedPathString,
+				match: matchedEncodedPath,
 				replacement: rewrittenPath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
 			))
 		}
 		
 		for (match, replacement) in paths {
 			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
-		}
-		
-		if dryRun, !paths.isEmpty {
-			paths.map { match, replacement in "Rewriting resource link '\(match)' → '\(replacement)'." }.forEach { string in print(string) }
 		}
 		
 		return rewrittenContents
