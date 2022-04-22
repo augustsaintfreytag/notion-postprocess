@@ -17,6 +17,8 @@ extension DocumentProcessor {
 	
 	private var fileManager: FileManager { FileManager.default }
 	
+	// MARK: Processing
+	
 	func processDocuments(in directory: URL) throws {
 		let _ = try processDocumentsAndWriteMap(startingIn: directory)
 	}
@@ -45,6 +47,8 @@ extension DocumentProcessor {
 		
 		return map
 	}
+	
+	// MARK: Indexing
 	
 	/// Indexes canonical names for all given documents and returns a map.
 	/// Skips all names already defined in the provided map.
