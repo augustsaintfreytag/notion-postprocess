@@ -51,7 +51,50 @@ extension DocumentProcessor {
 			profile.tick("directoryProcessed")
 		}
 		
+		let (updatedDirectories, updatedDocuments) = try rewrittenDirectoryAndDocumentURLs(directories: directories, documents: documents, map: map)
+		try groupDocumentsWithDirectories(directories: updatedDirectories, documents: updatedDocuments)
+		
 		return map
+	}
+	
+	// MARK: Grouping
+	
+	private func groupDocumentsWithDirectories(directories: [URL], documents: [URL]) throws {
+		let directoryByName = directories.reduce(into: [String: URL]()) { dictionary, directory in
+			dictionary[directory.lastPathComponent] = directory
+		}
+		
+		for document in documents {
+			let documentName = document.lastPathComponent
+			
+			guard let associatedDirectory = directoryByName[documentName] else {
+				continue
+			}
+			
+			try moveDocument(document, into: associatedDirectory)
+		}
+	}
+	
+	private func rewrittenDirectoryAndDocumentURLs(directories: [URL], documents: [URL], map: CanonicalNameMap) throws -> (directories: [URL], documents: [URL]) {
+		let updatedDirectories: [URL] = directories.compactMap { directory in
+			let originalDirectoryName = directory.lastPathComponent
+			
+			guard let canonicalDirectoryName = map[originalDirectoryName] else {
+				return nil
+			}
+			
+			return directory.deletingLastPathComponent().appendingPathComponent(canonicalDirectoryName)
+		}
+		
+		let updatedDocuments: [URL] = try documents.compactMap { document in
+			guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
+				return nil
+			}
+			
+			return document.deletingLastPathComponent().appendingPathComponent(canonicalDocumentName)
+		}
+		
+		return (updatedDirectories, updatedDocuments)
 	}
 	
 	// MARK: Indexing
@@ -195,6 +238,20 @@ extension DocumentProcessor {
 		}
 	}
 	
+	private func moveDocument(_ document: URL, into directory: URL) throws {
+		guard !dryRun else {
+			print("Move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)').")
+			return
+		}
+		
+		do {
+			let newDocument = document.appendingPathComponent(document.lastPathComponent, isDirectory: false)
+			try fileManager.moveItem(at: document, to: newDocument)
+		} catch {
+			throw FileError(description: "Could not move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
+		}
+	}
+	
 	// MARK: Document Contents
 	
 	/// Reads and rewrites the document, applies transformations for destination format.
@@ -258,6 +315,7 @@ extension DocumentProcessor {
 	
 	// MARK: Name Indexing
 	
+	/// Extracts the document identifier from its `URL` and returns its canonical name from the given map.
 	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
 		let originalDocumentName = fileNameWithoutExtension(from: document)
 		return map[originalDocumentName]
