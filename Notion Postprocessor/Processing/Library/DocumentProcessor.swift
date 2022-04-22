@@ -190,7 +190,11 @@ extension DocumentProcessor {
 	}
 	
 	private func fileNameWithoutExtension(from file: URL) -> String {
-		return try! file.lastPathComponent.removingMatches(matching: #"\.\w+$"#)
+		return fileNameWithoutExtension(from: file.lastPathComponent)
+	}
+	
+	private func fileNameWithoutExtension(from fileName: String) -> String {
+		return try! fileName.removingMatches(matching: #"\.\w+$"#)
 	}
 	
 	private func fileName(forCanonicalName canonicalName: String) -> String {
