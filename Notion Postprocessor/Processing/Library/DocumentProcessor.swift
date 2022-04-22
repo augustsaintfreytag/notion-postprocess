@@ -75,6 +75,38 @@ extension DocumentProcessor {
 		return map
 	}
 	
+	private var provisoryFileNameAppendix: String { "(Migrated)" }
+	
+	/// Index a provisory name for all given files or directories.
+	///
+	/// Generic indexing function that can be used with either directories or other
+	/// loose files (e.g. exported table data). Only indexes a derived provisory name
+	/// from the file name itself and append "(Migrated)" to indicate the makeshift
+	/// nature of the set name.
+	private func indexProvisoryFileName(_ files: [URL], map existingMap: CanonicalNameMap) -> CanonicalNameMap {
+		var map = CanonicalNameMap()
+		
+		for file in files {
+			let originalFileName = fileNameWithoutExtension(from: file)
+			let provisoryFileName = try! originalFileName.removingMatches(matching: #"\s[0-9a-f]{5}"#)
+			
+			guard !provisoryFileName.contains(provisoryFileNameAppendix) else {
+				profile.tick("duplicateNameIndexSkipped")
+				continue
+			}
+			
+			guard !existingMap.keys.contains(originalFileName), !map.keys.contains(originalFileName) else {
+				profile.tick("duplicateNameIndexSkipped")
+				continue
+			}
+			
+			map[originalFileName] = "\(provisoryFileName) \(provisoryFileNameAppendix)"
+			profile.tick("provisoryNameIndexed")
+		}
+		
+		return map
+	}
+	
 	private func canonicalDocumentNameWithFallback(for document: URL) throws -> String? {
 		if let canonicalDocumentName = try canonicalDocumentName(for: document) {
 			profile.tick("documentNameReadFromContents")
