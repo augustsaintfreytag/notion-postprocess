@@ -163,8 +163,8 @@ extension DocumentProcessor {
 			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
 		}
 		
-		if dryRun {
-			print("Rewriting resource links: \(paths.map { match, replacement in "'\(match)' → '\(replacement)'" }).")
+		if dryRun, !paths.isEmpty {
+			paths.map { match, replacement in "Rewriting resource link '\(match)' → '\(replacement)'." }.forEach { string in print(string) }
 		}
 		
 		return rewrittenContents
