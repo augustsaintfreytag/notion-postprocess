@@ -16,6 +16,7 @@
 		8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */; };
 		8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9728100E8E006BDACE /* DocumentProcessor.swift */; };
 		8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */; };
+		8B9C849E2812B36900353D9A /* FileError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C849D2812B36900353D9A /* FileError.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +41,7 @@
 		8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryEnumerator.swift; sourceTree = "<group>"; };
 		8B311A9728100E8E006BDACE /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
 		8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentNameProvider.swift; sourceTree = "<group>"; };
+		8B9C849D2812B36900353D9A /* FileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 		8B311A93280FFC70006BDACE /* Files */ = {
 			isa = PBXGroup;
 			children = (
+				8B9C849C2812B34800353D9A /* Errors */,
 				8B311A94280FFC7F006BDACE /* Library */,
 			);
 			path = Files;
@@ -155,6 +158,14 @@
 				8B311A91280FFC52006BDACE /* FileReader.swift */,
 			);
 			path = Library;
+			sourceTree = "<group>";
+		};
+		8B9C849C2812B34800353D9A /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				8B9C849D2812B36900353D9A /* FileError.swift */,
+			);
+			path = Errors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -229,6 +240,7 @@
 				8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */,
 				8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */,
 				8B311A92280FFC52006BDACE /* FileReader.swift in Sources */,
+				8B9C849E2812B36900353D9A /* FileError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
