@@ -117,7 +117,7 @@ extension DocumentProcessor {
 		
 		let originalDocumentName = fileNameWithoutExtension(from: document)
 		
-		if try! originalDocumentName.matches(#"\s[0-9a-f]{5}.md"#) == false {
+		if try! originalDocumentName.matches(#"\s[0-9a-f]{5}"#) == false {
 			let canonicalDocumentName = fileNameWithoutExtension(from: originalDocumentName)
 			print("Recovering document name from file as '\(canonicalDocumentName)', preserved by exporter.")
 			profile.tick("documentNameReadFromPreservedName")
