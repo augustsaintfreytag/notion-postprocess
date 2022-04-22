@@ -63,9 +63,8 @@ extension DocumentProcessor {
 				continue
 			}
 			
-			guard let canonicalDocumentName = try canonicalDocumentName(for: document) else {
-				print("Could not determine canonical name for file '\(document.path)'.")
-				profile.tick("documentNameNotIndexed")
+			guard let canonicalDocumentName = try canonicalDocumentNameWithFallback(for: document) else {
+				profile.tick("documentNameIndeterminate")
 				continue
 			}
 			
@@ -75,6 +74,29 @@ extension DocumentProcessor {
 		
 		return map
 	}
+	
+	private func canonicalDocumentNameWithFallback(for document: URL) throws -> String? {
+		if let canonicalDocumentName = try canonicalDocumentName(for: document) {
+			profile.tick("documentNameReadFromContents")
+			return canonicalDocumentName
+		}
+		
+		print("Could not determine canonical name for file '\(document.lastPathComponent)' (at '\(document.path)').")
+		
+		let originalDocumentName = fileNameWithoutExtension(from: document)
+		
+		if try! originalDocumentName.matches(#"\s[0-9a-f]{5}.md"#) == false {
+			let canonicalDocumentName = fileNameWithoutExtension(from: originalDocumentName)
+			print("Recovering document name from file as '\(canonicalDocumentName)', preserved by exporter.")
+			profile.tick("documentNameReadFromPreservedName")
+			
+			return canonicalDocumentName
+		}
+		
+		return nil
+	}
+	
+	// MARK: Rewrite & Rename
 	
 	private func rewriteAndRenameDocument(_ document: URL, map: CanonicalNameMap) throws {
 		var documentContents = try documentContents(at: document)
