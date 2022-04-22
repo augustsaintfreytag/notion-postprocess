@@ -151,8 +151,17 @@ extension DocumentProcessor {
 			return
 		}
 		
-		try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
-		try fileManager.removeItem(at: document)
+		do {
+			try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
+		} catch {
+			throw FileError(description: "Could not write renamed document '\(newDocument.lastPathComponent)' to disk (at '\(newDocument.path)'). \(error.localizedDescription)")
+		}
+		
+		do {
+			try fileManager.removeItem(at: document)
+		} catch {
+			throw FileError(description: "Could not remove document '\(document.lastPathComponent)' (at '\(document.path)'). \(error.localizedDescription)")
+		}
 	}
 	
 	private func renameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
@@ -172,7 +181,12 @@ extension DocumentProcessor {
 		}
 		
 		let movedDirectory = directory.deletingLastPathComponent().appendingPathComponent(newName, isDirectory: true)
-		try fileManager.moveItem(at: directory, to: movedDirectory)
+		
+		do {
+			try fileManager.moveItem(at: directory, to: movedDirectory)
+		} catch {
+			throw FileError(description: "Could not rename directory '\(directory.lastPathComponent)' to '\(movedDirectory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
+		}
 	}
 	
 	// MARK: Document Contents
