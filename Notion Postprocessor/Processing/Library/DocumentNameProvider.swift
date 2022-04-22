@@ -25,7 +25,10 @@ extension DocumentNameProvider {
 			return nil
 		}
 		
-		return String(headingSubstring).trimmingCharacters(in: .whitespacesAndNewlines)
+		return try! String(headingSubstring)
+			.removingMatches(matching: #"[^0-9a-zA-Z #&@()+_,;.'\-\u00c0-\u017f]"#)
+			.replacingMatches(matching: #"\s+"#, with: " ")
+			.trimmingCharacters(in: .whitespacesAndNewlines)
 	}
 	
 }
