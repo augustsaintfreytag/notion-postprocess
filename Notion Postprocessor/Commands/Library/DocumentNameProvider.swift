@@ -12,7 +12,7 @@ extension DocumentNameProvider {
 	
 	/// Reads the document at the given URL and returns its canonical name if possible.
 	func canonicalDocumentName(for document: URL) throws -> String? {
-		let contents = try documentContents(at: document)
+		let contents = try fileContents(for: document)
 		return documentName(fromFileContents: contents)
 	}
 	

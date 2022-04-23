@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct ProcessingError: LocalizedError {
+struct CommandError: LocalizedError {
 	
 	let kind: Kind
 	let errorDescription: String?
@@ -16,7 +16,7 @@ struct ProcessingError: LocalizedError {
 	
 }
 
-extension ProcessingError {
+extension CommandError {
 	
 	enum Kind: String {
 		case unreadableData

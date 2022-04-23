@@ -4,9 +4,9 @@
 
 import Foundation
 
-protocol DirectoryEnumerator {}
+protocol DirectoryReader {}
 
-extension DirectoryEnumerator {
+extension DirectoryReader {
 	
 	private var fileManager: FileManager { FileManager.default }
 	
