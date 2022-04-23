@@ -17,6 +17,7 @@
 		8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9728100E8E006BDACE /* DocumentProcessor.swift */; };
 		8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */; };
 		8B9C849E2812B36900353D9A /* FileError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C849D2812B36900353D9A /* FileError.swift */; };
+		8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C84A02813F4B200353D9A /* FileWriter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +43,7 @@
 		8B311A9728100E8E006BDACE /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
 		8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentNameProvider.swift; sourceTree = "<group>"; };
 		8B9C849D2812B36900353D9A /* FileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileError.swift; sourceTree = "<group>"; };
+		8B9C84A02813F4B200353D9A /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,6 +158,7 @@
 			children = (
 				8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */,
 				8B311A91280FFC52006BDACE /* FileReader.swift */,
+				8B9C84A02813F4B200353D9A /* FileWriter.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 			files = (
 				8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */,
 				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
+				8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */,
 				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
 				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
 				8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */,

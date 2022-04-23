@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
+protocol DocumentProcessor: DirectoryEnumerator, FileWriter, DocumentNameProvider {
 
 	typealias CanonicalNameMap = [String: String]
 	
@@ -14,8 +14,6 @@ protocol DocumentProcessor: DirectoryEnumerator, DocumentNameProvider {
 }
 
 extension DocumentProcessor {
-	
-	private var fileManager: FileManager { FileManager.default }
 	
 	// MARK: Processing
 	
@@ -83,10 +81,11 @@ extension DocumentProcessor {
 				continue
 			}
 			
-			let documentContents = try documentContents(at: document)
+			let documentContents = try fileContents(for: document)
 			let rewrittenDocumentContents = rewrittenDocumentGroupPaths(documentContents, removingPathComponent: documentName)
 			
-			try moveDocument(document, into: associatedDirectory, withUpdatedContents: rewrittenDocumentContents)
+			try moveAndUpdateDocument(document, into: associatedDirectory, updatingContents: rewrittenDocumentContents)
+			profile.tick("moveDocument")
 		}
 	}
 	
@@ -195,7 +194,7 @@ extension DocumentProcessor {
 	// MARK: Rewrite & Rename
 	
 	private func rewriteAndRenameDocument(_ document: URL, map: CanonicalNameMap) throws {
-		var documentContents = try documentContents(at: document)
+		var documentContents = try fileContents(for: document)
 		documentContents = rewrittenDocumentContents(documentContents)
 		documentContents = rewrittenDocumentResourceLinks(documentContents, map: map)
 		
@@ -203,30 +202,7 @@ extension DocumentProcessor {
 			throw ProcessingError(kind: .missingData, description: "Could not determine canonical document name for '\(document.lastPathComponent)' (at '\(document.path)') to rewrite and rename.")
 		}
 		
-		try rewriteAndRenameDocument(document, newName: canonicalDocumentName, newContents: documentContents)
-	}
-	
-	private func rewriteAndRenameDocument(_ document: URL, newName: String, newContents: String) throws {
-		let newDocumentFileName = fileName(forCanonicalName: newName)
-		let newDocument = document.deletingLastPathComponent().appendingPathComponent(newDocumentFileName)
-		
-		guard !dryRun else {
-			print("Rename file '\(document.lastPathComponent)' to '\(newDocumentFileName)'.")
-			return
-		}
-		
-		do {
-			try newContents.write(to: newDocument, atomically: false, encoding: .utf8)
-		} catch {
-			throw FileError(description: "Could not write renamed document '\(newDocument.lastPathComponent)' to disk (at '\(newDocument.path)'). \(error.localizedDescription)")
-		}
-		
-		do {
-			try fileManager.removeItem(at: document)
-		} catch {
-			throw FileError(description: "Could not remove document '\(document.lastPathComponent)' (at '\(document.path)'). \(error.localizedDescription)")
-		}
-		
+		try moveAndUpdateDocument(document, updatingName: canonicalDocumentName, updatingContents: documentContents)
 		profile.tick("renameDocument")
 	}
 	
@@ -238,6 +214,7 @@ extension DocumentProcessor {
 		}
 		
 		try renameDirectory(directory, newName: canonicalDirectoryName)
+		profile.tick("renameDirectory")
 	}
 	
 	private func renameDirectory(_ directory: URL, newName: String) throws {
@@ -253,30 +230,6 @@ extension DocumentProcessor {
 		} catch {
 			throw FileError(description: "Could not rename directory '\(directory.lastPathComponent)' to '\(movedDirectory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
 		}
-		
-		profile.tick("renameDirectory")
-	}
-	
-	private func moveDocument(_ document: URL, into directory: URL, withUpdatedContents contents: String? = nil) throws {
-		guard !dryRun else {
-			print("Move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)').")
-			return
-		}
-		
-		do {
-			guard let contents = contents else {
-				try fileManager.moveItem(at: document, to: directory)
-				return
-			}
-			
-			let newDocument = directory.appendingPathComponent(document.lastPathComponent, isDirectory: false)
-			try contents.write(to: newDocument, atomically: false, encoding: .utf8)
-			try fileManager.removeItem(at: document)
-		} catch {
-			throw FileError(description: "Could not move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
-		}
-		
-		profile.tick("moveDocument")
 	}
 	
 	// MARK: Document Contents
@@ -373,18 +326,6 @@ extension DocumentProcessor {
 	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
 		let originalDocumentName = fileNameWithoutExtension(from: document)
 		return map[originalDocumentName]
-	}
-	
-	private func fileNameWithoutExtension(from file: URL) -> String {
-		return fileNameWithoutExtension(from: file.lastPathComponent)
-	}
-	
-	private func fileNameWithoutExtension(from fileName: String) -> String {
-		return try! fileName.removingMatches(matching: #"\.\w+$"#)
-	}
-	
-	private func fileName(forCanonicalName canonicalName: String) -> String {
-		return canonicalName + ".md"
 	}
 	
 }
