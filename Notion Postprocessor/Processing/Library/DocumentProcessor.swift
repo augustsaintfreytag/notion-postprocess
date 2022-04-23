@@ -54,6 +54,64 @@ extension DocumentProcessor {
 		return map
 	}
 	
+	func groupDocuments(in directory: URL) throws {
+		let (directories, documents, _) = try fileURLs(in: directory)
+		
+		for directory in directories {
+			try groupDocuments(in: directory)
+			profile.tick("directoryProcessed")
+		}
+		
+		try groupDocumentsWithDirectories(directories: directories, documents: documents)
+	}
+	
+	// MARK: Grouping
+	
+	private func groupDocumentsWithDirectories(directories: [URL], documents: [URL]) throws {
+		guard !directories.isEmpty else {
+			return
+		}
+		
+		let directoryByName = directories.reduce(into: [String: URL]()) { dictionary, directory in
+			dictionary[directory.lastPathComponent] = directory
+		}
+		
+		for document in documents {
+			let documentName = fileNameWithoutExtension(from: document)
+			
+			guard let associatedDirectory = directoryByName[documentName] else {
+				continue
+			}
+			
+			let documentContents = try documentContents(at: document)
+			let rewrittenDocumentContents = rewrittenDocumentGroupPaths(documentContents, removingPathComponent: documentName)
+			
+			try moveDocument(document, into: associatedDirectory, withUpdatedContents: rewrittenDocumentContents)
+		}
+	}
+	
+	private func rewrittenDirectoryAndDocumentURLs(directories: [URL], documents: [URL], map: CanonicalNameMap) throws -> (directories: [URL], documents: [URL]) {
+		let updatedDirectories: [URL] = directories.compactMap { directory in
+			let originalDirectoryName = directory.lastPathComponent
+			
+			guard let canonicalDirectoryName = map[originalDirectoryName] else {
+				return nil
+			}
+			
+			return directory.deletingLastPathComponent().appendingPathComponent(canonicalDirectoryName)
+		}
+		
+		let updatedDocuments: [URL] = try documents.compactMap { document in
+			guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
+				return nil
+			}
+			
+			return document.deletingLastPathComponent().appendingPathComponent(canonicalDocumentName)
+		}
+		
+		return (updatedDirectories, updatedDocuments)
+	}
+	
 	// MARK: Indexing
 	
 	/// Indexes canonical names for all given documents and returns a map.
@@ -168,6 +226,8 @@ extension DocumentProcessor {
 		} catch {
 			throw FileError(description: "Could not remove document '\(document.lastPathComponent)' (at '\(document.path)'). \(error.localizedDescription)")
 		}
+		
+		profile.tick("renameDocument")
 	}
 	
 	private func renameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
@@ -193,6 +253,30 @@ extension DocumentProcessor {
 		} catch {
 			throw FileError(description: "Could not rename directory '\(directory.lastPathComponent)' to '\(movedDirectory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
 		}
+		
+		profile.tick("renameDirectory")
+	}
+	
+	private func moveDocument(_ document: URL, into directory: URL, withUpdatedContents contents: String? = nil) throws {
+		guard !dryRun else {
+			print("Move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)').")
+			return
+		}
+		
+		do {
+			guard let contents = contents else {
+				try fileManager.moveItem(at: document, to: directory)
+				return
+			}
+			
+			let newDocument = directory.appendingPathComponent(document.lastPathComponent, isDirectory: false)
+			try contents.write(to: newDocument, atomically: false, encoding: .utf8)
+			try fileManager.removeItem(at: document)
+		} catch {
+			throw FileError(description: "Could not move document '\(document.lastPathComponent)' into '\(directory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
+		}
+		
+		profile.tick("moveDocument")
 	}
 	
 	// MARK: Document Contents
@@ -212,13 +296,10 @@ extension DocumentProcessor {
 	
 	/// Finds paths to resources inside the given document contents and rewrites
 	private func rewrittenDocumentResourceLinks(_ contents: String, map: CanonicalNameMap) -> String {
-		var paths: [(match: String, replacement: String)] = []
-		var rewrittenContents = contents
-		
-		forEachResourcePath(in: contents) { matchedPathString, path in
+		return rewriteResourcePaths(in: contents) { path in
 			// Skip external paths
 			guard !path.contains("http") else {
-				return
+				return nil
 			}
 			
 			var rewrittenPath = path
@@ -227,18 +308,48 @@ extension DocumentProcessor {
 				rewrittenPath = rewrittenPath.replacingOccurrences(of: originalName, with: canonicalName)
 			}
 			
+			if dryRun {
+				print("Rewriting resource link '\(path)' → '\(rewrittenPath)'.")
+			}
+			
+			return rewrittenPath
+		}
+	}
+	
+	private func rewrittenDocumentGroupPaths(_ contents: String, removingPathComponent name: String) -> String {
+		return rewriteResourcePaths(in: contents) { path in
+			// Skip external paths
+			guard !path.contains("http") else {
+				return nil
+			}
+			
+			let rewrittenPath = try! path.removingMatches(matching: "\(name)/")
+			
+			if dryRun {
+				print("Rewriting resource link for grouping '\(path)' → '\(rewrittenPath)'.")
+			}
+			
+			return rewrittenPath
+		}
+	}
+	
+	private func rewriteResourcePaths(in contents: String, block: (_ path: String) -> String?) -> String {
+		var paths: [(match: String, replacement: String)] = []
+		var rewrittenContents = contents
+		
+		forEachResourcePath(in: contents) { matchedEncodedPath, path in
+			guard let rewrittenPath = block(path) else {
+				return
+			}
+			
 			paths.append((
-				match: matchedPathString,
+				match: matchedEncodedPath,
 				replacement: rewrittenPath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
 			))
 		}
 		
 		for (match, replacement) in paths {
 			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
-		}
-		
-		if dryRun, !paths.isEmpty {
-			paths.map { match, replacement in "Rewriting resource link '\(match)' → '\(replacement)'." }.forEach { string in print(string) }
 		}
 		
 		return rewrittenContents
@@ -258,6 +369,7 @@ extension DocumentProcessor {
 	
 	// MARK: Name Indexing
 	
+	/// Extracts the document identifier from its `URL` and returns its canonical name from the given map.
 	private func canonicalDocumentName(for document: URL, using map: CanonicalNameMap) throws -> String? {
 		let originalDocumentName = fileNameWithoutExtension(from: document)
 		return map[originalDocumentName]
