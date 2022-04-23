@@ -18,6 +18,9 @@ import ArgumentParser
 	
 	// MARK: Parameters
 	
+	@Argument(help: "The mode of operation. (rewrite|regroup)")
+	var mode: Mode
+	
 	@Argument(help: "Path to the directory exported from Notion to be processed.", completion: CompletionKind.directory)
 	var inputPath: String
 	
@@ -32,7 +35,13 @@ import ArgumentParser
 	
 	func run() throws {
 		let directory = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
-		try processDocuments(in: directory)
+		
+		switch mode {
+		case .rewrite:
+			try processDocuments(in: directory)
+		case .regroup:
+			try groupDocuments(in: directory)
+		}
 		
 		print(profile.counts)
 	}
@@ -42,10 +51,16 @@ import ArgumentParser
 extension NotionPostprocessor {
 	
 	enum CodingKeys: CodingKey {
+		case mode
 		case inputPath
 		case dryRun
 	}
 	
+}
+
+enum Mode: String, ExpressibleByArgument {
+	case rewrite
+	case regroup
 }
 
 class PerformanceProfile: Codable {
