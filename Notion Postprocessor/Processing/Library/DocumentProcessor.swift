@@ -269,7 +269,7 @@ extension DocumentProcessor {
 				return
 			}
 			
-			let newDocument = document.appendingPathComponent(document.lastPathComponent, isDirectory: false)
+			let newDocument = directory.appendingPathComponent(document.lastPathComponent, isDirectory: false)
 			try contents.write(to: newDocument, atomically: false, encoding: .utf8)
 			try fileManager.removeItem(at: document)
 		} catch {
