@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol DocumentProcessor: DirectoryEnumerator, FileWriter, DocumentNameProvider {
+protocol DocumentProcessor: FileWriter, DirectoryReader, DirectoryWriter, DocumentNameProvider {
 
 	typealias CanonicalNameMap = [String: String]
 	
@@ -45,7 +45,7 @@ extension DocumentProcessor {
 		}
 		
 		for directory in directories {
-			try renameDirectory(directory, map: map)
+			try rewriteAndRenameDirectory(directory, map: map)
 			profile.tick("directoryProcessed")
 		}
 		
@@ -206,30 +206,15 @@ extension DocumentProcessor {
 		profile.tick("renameDocument")
 	}
 	
-	private func renameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
+	private func rewriteAndRenameDirectory(_ directory: URL, map: CanonicalNameMap) throws {
 		let directoryName = directory.lastPathComponent
 		
 		guard let canonicalDirectoryName = map[directoryName] else {
 			throw ProcessingError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.lastPathComponent)' (at '\(directory.path)') to rename.")
 		}
 		
-		try renameDirectory(directory, newName: canonicalDirectoryName)
+		try renameDirectory(directory, to: canonicalDirectoryName)
 		profile.tick("renameDirectory")
-	}
-	
-	private func renameDirectory(_ directory: URL, newName: String) throws {
-		guard !dryRun else {
-			print("Rename directory '\(directory.lastPathComponent)' to '\(newName)'.")
-			return
-		}
-		
-		let movedDirectory = directory.deletingLastPathComponent().appendingPathComponent(newName, isDirectory: true)
-		
-		do {
-			try fileManager.moveItem(at: directory, to: movedDirectory)
-		} catch {
-			throw FileError(description: "Could not rename directory '\(directory.lastPathComponent)' to '\(movedDirectory.lastPathComponent)' (at '\(directory.path)'). \(error.localizedDescription)")
-		}
 	}
 	
 	// MARK: Document Contents

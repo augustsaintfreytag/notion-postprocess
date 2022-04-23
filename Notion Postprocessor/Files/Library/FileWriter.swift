@@ -12,7 +12,7 @@ protocol FileWriter: FileReader {
 
 extension FileWriter {
 	
-	var fileManager: FileManager { FileManager.default }
+	private var fileManager: FileManager { FileManager.default }
 	
 	func moveAndUpdateDocument(_ document: URL, into directory: URL? = nil, updatingName newName: String? = nil, updatingContents newContents: String? = nil) throws {
 		let newDocumentName = newName ?? document.lastPathComponent

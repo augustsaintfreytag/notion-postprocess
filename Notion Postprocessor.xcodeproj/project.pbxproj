@@ -13,11 +13,12 @@
 		8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A85280EB021006BDACE /* String+RegularExpression.swift */; };
 		8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A8C280EB4E8006BDACE /* ProcessingError.swift */; };
 		8B311A92280FFC52006BDACE /* FileReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A91280FFC52006BDACE /* FileReader.swift */; };
-		8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */; };
+		8B311A96280FFC8A006BDACE /* DirectoryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryReader.swift */; };
 		8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9728100E8E006BDACE /* DocumentProcessor.swift */; };
 		8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */; };
 		8B9C849E2812B36900353D9A /* FileError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C849D2812B36900353D9A /* FileError.swift */; };
 		8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C84A02813F4B200353D9A /* FileWriter.swift */; };
+		8B9C84A52813FE7800353D9A /* DirectoryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,11 +40,12 @@
 		8B311A85280EB021006BDACE /* String+RegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegularExpression.swift"; sourceTree = "<group>"; };
 		8B311A8C280EB4E8006BDACE /* ProcessingError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingError.swift; sourceTree = "<group>"; };
 		8B311A91280FFC52006BDACE /* FileReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileReader.swift; sourceTree = "<group>"; };
-		8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryEnumerator.swift; sourceTree = "<group>"; };
+		8B311A95280FFC8A006BDACE /* DirectoryReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryReader.swift; sourceTree = "<group>"; };
 		8B311A9728100E8E006BDACE /* DocumentProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProcessor.swift; sourceTree = "<group>"; };
 		8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentNameProvider.swift; sourceTree = "<group>"; };
 		8B9C849D2812B36900353D9A /* FileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileError.swift; sourceTree = "<group>"; };
 		8B9C84A02813F4B200353D9A /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
+		8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWriter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,7 +158,8 @@
 		8B311A94280FFC7F006BDACE /* Library */ = {
 			isa = PBXGroup;
 			children = (
-				8B311A95280FFC8A006BDACE /* DirectoryEnumerator.swift */,
+				8B311A95280FFC8A006BDACE /* DirectoryReader.swift */,
+				8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */,
 				8B311A91280FFC52006BDACE /* FileReader.swift */,
 				8B9C84A02813F4B200353D9A /* FileWriter.swift */,
 			);
@@ -237,10 +240,11 @@
 			files = (
 				8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */,
 				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
+				8B9C84A52813FE7800353D9A /* DirectoryWriter.swift in Sources */,
 				8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */,
 				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
 				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
-				8B311A96280FFC8A006BDACE /* DirectoryEnumerator.swift in Sources */,
+				8B311A96280FFC8A006BDACE /* DirectoryReader.swift in Sources */,
 				8B311A9828100E8E006BDACE /* DocumentProcessor.swift in Sources */,
 				8B311A8D280EB4E8006BDACE /* ProcessingError.swift in Sources */,
 				8B311A92280FFC52006BDACE /* FileReader.swift in Sources */,
