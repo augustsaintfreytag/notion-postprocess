@@ -28,7 +28,7 @@ extension FileReader {
 		let fileData = try Data(contentsOf: file)
 		
 		guard let fileContents = String(data: fileData, encoding: .utf8) else {
-			throw ProcessingError(kind: .unreadableData, description: "Could not decode document data to string.")
+			throw CommandError(kind: .unreadableData, description: "Could not decode document data to string.")
 		}
 		
 		return fileContents

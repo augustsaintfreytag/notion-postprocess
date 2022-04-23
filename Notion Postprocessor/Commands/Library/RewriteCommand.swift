@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol DocumentProcessor: FileWriter, DirectoryReader, DirectoryWriter, DocumentNameProvider {
+protocol RewriteCommand: FileWriter, DirectoryReader, DirectoryWriter, DocumentNameProvider, ResourcePathProvider {
 
 	typealias CanonicalNameMap = [String: String]
 	
@@ -13,7 +13,7 @@ protocol DocumentProcessor: FileWriter, DirectoryReader, DirectoryWriter, Docume
 	
 }
 
-extension DocumentProcessor {
+extension RewriteCommand {
 	
 	// MARK: Processing
 	
@@ -50,65 +50,6 @@ extension DocumentProcessor {
 		}
 		
 		return map
-	}
-	
-	func groupDocuments(in directory: URL) throws {
-		let (directories, documents, _) = try fileURLs(in: directory)
-		
-		for directory in directories {
-			try groupDocuments(in: directory)
-			profile.tick("directoryProcessed")
-		}
-		
-		try groupDocumentsWithDirectories(directories: directories, documents: documents)
-	}
-	
-	// MARK: Grouping
-	
-	private func groupDocumentsWithDirectories(directories: [URL], documents: [URL]) throws {
-		guard !directories.isEmpty else {
-			return
-		}
-		
-		let directoryByName = directories.reduce(into: [String: URL]()) { dictionary, directory in
-			dictionary[directory.lastPathComponent] = directory
-		}
-		
-		for document in documents {
-			let documentName = fileNameWithoutExtension(from: document)
-			
-			guard let associatedDirectory = directoryByName[documentName] else {
-				continue
-			}
-			
-			let documentContents = try fileContents(for: document)
-			let rewrittenDocumentContents = rewrittenDocumentGroupPaths(documentContents, removingPathComponent: documentName)
-			
-			try moveAndUpdateDocument(document, into: associatedDirectory, updatingContents: rewrittenDocumentContents)
-			profile.tick("moveDocument")
-		}
-	}
-	
-	private func rewrittenDirectoryAndDocumentURLs(directories: [URL], documents: [URL], map: CanonicalNameMap) throws -> (directories: [URL], documents: [URL]) {
-		let updatedDirectories: [URL] = directories.compactMap { directory in
-			let originalDirectoryName = directory.lastPathComponent
-			
-			guard let canonicalDirectoryName = map[originalDirectoryName] else {
-				return nil
-			}
-			
-			return directory.deletingLastPathComponent().appendingPathComponent(canonicalDirectoryName)
-		}
-		
-		let updatedDocuments: [URL] = try documents.compactMap { document in
-			guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
-				return nil
-			}
-			
-			return document.deletingLastPathComponent().appendingPathComponent(canonicalDocumentName)
-		}
-		
-		return (updatedDirectories, updatedDocuments)
 	}
 	
 	// MARK: Indexing
@@ -199,7 +140,7 @@ extension DocumentProcessor {
 		documentContents = rewrittenDocumentResourceLinks(documentContents, map: map)
 		
 		guard let canonicalDocumentName = try canonicalDocumentName(for: document, using: map) else {
-			throw ProcessingError(kind: .missingData, description: "Could not determine canonical document name for '\(document.lastPathComponent)' (at '\(document.path)') to rewrite and rename.")
+			throw CommandError(kind: .missingData, description: "Could not determine canonical document name for '\(document.lastPathComponent)' (at '\(document.path)') to rewrite and rename.")
 		}
 		
 		try moveAndUpdateDocument(document, updatingName: canonicalDocumentName, updatingContents: documentContents)
@@ -210,7 +151,7 @@ extension DocumentProcessor {
 		let directoryName = directory.lastPathComponent
 		
 		guard let canonicalDirectoryName = map[directoryName] else {
-			throw ProcessingError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.lastPathComponent)' (at '\(directory.path)') to rename.")
+			throw CommandError(kind: .missingData, description: "Could not determine canonical directory name for '\(directory.lastPathComponent)' (at '\(directory.path)') to rename.")
 		}
 		
 		try renameDirectory(directory, to: canonicalDirectoryName)
@@ -251,57 +192,6 @@ extension DocumentProcessor {
 			}
 			
 			return rewrittenPath
-		}
-	}
-	
-	private func rewrittenDocumentGroupPaths(_ contents: String, removingPathComponent name: String) -> String {
-		return rewriteResourcePaths(in: contents) { path in
-			// Skip external paths
-			guard !path.contains("http") else {
-				return nil
-			}
-			
-			let rewrittenPath = try! path.removingMatches(matching: "\(name)/")
-			
-			if dryRun {
-				print("Rewriting resource link for grouping '\(path)' → '\(rewrittenPath)'.")
-			}
-			
-			return rewrittenPath
-		}
-	}
-	
-	private func rewriteResourcePaths(in contents: String, block: (_ path: String) -> String?) -> String {
-		var paths: [(match: String, replacement: String)] = []
-		var rewrittenContents = contents
-		
-		forEachResourcePath(in: contents) { matchedEncodedPath, path in
-			guard let rewrittenPath = block(path) else {
-				return
-			}
-			
-			paths.append((
-				match: matchedEncodedPath,
-				replacement: rewrittenPath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)!
-			))
-		}
-		
-		for (match, replacement) in paths {
-			rewrittenContents = rewrittenContents.replacingOccurrences(of: match, with: replacement)
-		}
-		
-		return rewrittenContents
-	}
-	
-	private func forEachResourcePath(in contents: String, _ block: (_ matchedPathString: String, _ path: String) -> Void) {
-		let matches = try! contents.allMatchGroups(#"\[.+?\]\((.+?)\)"#)
-		
-		for match in matches {
-			guard let matchedPathString = match[1], let path = matchedPathString.removingPercentEncoding else {
-				continue
-			}
-			
-			block(String(matchedPathString), path)
 		}
 	}
 	

@@ -14,7 +14,7 @@ import ArgumentParser
 /// - Correct name (read top level heading in `.md` file)
 ///
 
-@main struct NotionPostprocessor: ParsableCommand, DocumentProcessor {
+@main struct NotionPostprocessor: ParsableCommand, RewriteCommand, RegroupCommand {
 	
 	// MARK: Parameters
 	
