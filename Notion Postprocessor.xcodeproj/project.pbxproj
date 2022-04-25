@@ -16,6 +16,8 @@
 		8B311A96280FFC8A006BDACE /* DirectoryReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A95280FFC8A006BDACE /* DirectoryReader.swift */; };
 		8B311A9828100E8E006BDACE /* RewriteCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9728100E8E006BDACE /* RewriteCommand.swift */; };
 		8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */; };
+		8B83D2CF2816A52C00B45BCC /* Manifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83D2CE2816A52C00B45BCC /* Manifest.swift */; };
+		8B83D2D22816A60600B45BCC /* ExpressibleByArgument+Description.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B83D2D12816A60600B45BCC /* ExpressibleByArgument+Description.swift */; };
 		8B9C849E2812B36900353D9A /* FileError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C849D2812B36900353D9A /* FileError.swift */; };
 		8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C84A02813F4B200353D9A /* FileWriter.swift */; };
 		8B9C84A52813FE7800353D9A /* DirectoryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */; };
@@ -45,6 +47,8 @@
 		8B311A95280FFC8A006BDACE /* DirectoryReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryReader.swift; sourceTree = "<group>"; };
 		8B311A9728100E8E006BDACE /* RewriteCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewriteCommand.swift; sourceTree = "<group>"; };
 		8B311A9928100EAE006BDACE /* DocumentNameProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentNameProvider.swift; sourceTree = "<group>"; };
+		8B83D2CE2816A52C00B45BCC /* Manifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Manifest.swift; sourceTree = "<group>"; };
+		8B83D2D12816A60600B45BCC /* ExpressibleByArgument+Description.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExpressibleByArgument+Description.swift"; sourceTree = "<group>"; };
 		8B9C849D2812B36900353D9A /* FileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileError.swift; sourceTree = "<group>"; };
 		8B9C84A02813F4B200353D9A /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
 		8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWriter.swift; sourceTree = "<group>"; };
@@ -84,6 +88,7 @@
 			isa = PBXGroup;
 			children = (
 				8B311A76280DE9ED006BDACE /* Command.swift */,
+				8B83D2CE2816A52C00B45BCC /* Manifest.swift */,
 				8B311A87280EB49A006BDACE /* Arguments */,
 				8B9C84A82813FFEC00353D9A /* Commands */,
 				8B311A83280EB004006BDACE /* Common */,
@@ -112,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				8B311A88280EB4AA006BDACE /* Errors */,
+				8B83D2D02816A5FD00B45BCC /* Extensions */,
 			);
 			path = Arguments;
 			sourceTree = "<group>";
@@ -150,6 +156,14 @@
 				8B9C84A02813F4B200353D9A /* FileWriter.swift */,
 			);
 			path = Library;
+			sourceTree = "<group>";
+		};
+		8B83D2D02816A5FD00B45BCC /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8B83D2D12816A60600B45BCC /* ExpressibleByArgument+Description.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		8B9C849C2812B34800353D9A /* Errors */ = {
@@ -244,11 +258,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B83D2CF2816A52C00B45BCC /* Manifest.swift in Sources */,
 				8B311A9A28100EAE006BDACE /* DocumentNameProvider.swift in Sources */,
 				8B311A77280DE9ED006BDACE /* Command.swift in Sources */,
 				8B9C84AD2814000500353D9A /* RegroupCommand.swift in Sources */,
 				8B9C84A52813FE7800353D9A /* DirectoryWriter.swift in Sources */,
 				8B9C84A12813F4B200353D9A /* FileWriter.swift in Sources */,
+				8B83D2D22816A60600B45BCC /* ExpressibleByArgument+Description.swift in Sources */,
 				8B311A86280EB021006BDACE /* String+RegularExpression.swift in Sources */,
 				8B311A81280DF6B9006BDACE /* ArgumentError.swift in Sources */,
 				8B311A96280FFC8A006BDACE /* DirectoryReader.swift in Sources */,
