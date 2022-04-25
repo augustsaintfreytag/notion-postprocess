@@ -16,15 +16,29 @@ import ArgumentParser
 
 @main struct NotionPostprocessor: ParsableCommand, RewriteCommand, RegroupCommand {
 	
+	static let configuration = CommandConfiguration(
+		commandName: Manifest.command,
+		abstract: "Process and rewrite data exported from Notion for import and use in Craft.",
+		discussion: lines(
+			"The utility processes a Markdown export from Notion, either of a single page or a whole workspace.",
+			"Note that Notion produces a compressed ZIP archive by default, the utility expects an extracted directory structure.",
+			"The passed input directory and files are *changed in place*.",
+			"All operation modes should be considered not idempotent, it is recommended to",
+			"keep a backup of the exported data should the migration encounter issues."
+		),
+		version: "\(Manifest.name), Version \(Manifest.versionDescription)",
+		helpNames: [.customShort("?"), .long]
+	)
+	
 	// MARK: Parameters
 	
-	@Argument(help: "The mode of operation. (rewrite|regroup)")
+	@Argument(help: "The mode of operation. (options: \(Mode.allCasesHelpDescription))")
 	var mode: Mode
 	
 	@Argument(help: "Path to the directory exported from Notion to be processed.", completion: CompletionKind.directory)
 	var inputPath: String
 	
-	@Flag(help: "Prints out the changes that would be made to the input directory and its files but does not execute them.")
+	@Flag(help: "Print the changes made to the input but do not not execute them.")
 	var dryRun: Bool = false
 	
 	// MARK: State
@@ -37,6 +51,9 @@ import ArgumentParser
 		let directory = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
 		
 		switch mode {
+		case .all:
+			try processDocuments(in: directory)
+			try groupDocuments(in: directory)
 		case .rewrite:
 			try processDocuments(in: directory)
 		case .regroup:
@@ -58,10 +75,15 @@ extension NotionPostprocessor {
 	
 }
 
-enum Mode: String, ExpressibleByArgument {
+// MARK: Mode
+
+enum Mode: String, CaseIterable, ExpressibleByArgument {
+	case all
 	case rewrite
 	case regroup
 }
+
+// MARK: Performance
 
 class PerformanceProfile: Codable {
 	
