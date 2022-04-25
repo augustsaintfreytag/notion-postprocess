@@ -8,9 +8,9 @@ enum Manifest {
 	
 	// MARK: Data
 	
-	static let name = "Notion Postprocessor"
-	static let command = "notion-postprocessor"
-	static let version = "1.0.0"
+	static let name = "Notion Postprocess"
+	static let command = "notion-postprocess"
+	static let version = "1.1.0"
 	
 	// MARK: Formatting
 	

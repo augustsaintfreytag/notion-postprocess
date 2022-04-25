@@ -1,10 +1,10 @@
-# Notion Postprocessor
+# Notion Postprocess
 
 This is a utility to aid in the migration of content from Notion to Craft. It works on input from the Markdown export provided by the Notion app (called “Markdown & CSV”) and processes a hierarchy of specific pages and subpages  or a whole workspace export in one step. The resulting structure of directories and files can be imported into Craft as-is, with working resource paths (images, videos, other media) and page links.
 
 ## Usage
 
-The postprocessor offers two independent passes, one for *rewrite*, one for *regroup*. All changes are made in-place, changing the given input directories and files on the file system. The pass to run can be specified as an optional first argument; when omitted, both passes are run sequentially.
+The postprocess utility two independent passes, one for *rewrite*, one for *regroup*. All changes are made in-place, changing the given input directories and files on the file system. The pass to run can be specified as an optional first argument; when omitted, both passes are run sequentially.
 
 Note that the *regroup* operation is intended to use the output of the rewrite pass for best results, though it can theoretically be used with any input structure.
 
@@ -24,18 +24,18 @@ OPTIONS:
 ## Examples
 
 ```Bash
-# Rewrite all files and directories
-notion-postprocessor "./Workspace Export" --dry-run
+# Rewrite and regroup all files and directories
+notion-postprocess all "./Workspace Export" --dry-run
 ```
 
 ```Bash
 # Rewrite all files and directories
-notion-postprocessor rewrite "./Workspace Export"
+notion-postprocess rewrite "./Workspace Export"
 ```
 
 ```Bash
 # Regroup files with associated group directories
-notion-postprocessor regroup "./Workspace Export"
+notion-postprocess regroup "./Workspace Export"
 ```
 
 ## In-Depth

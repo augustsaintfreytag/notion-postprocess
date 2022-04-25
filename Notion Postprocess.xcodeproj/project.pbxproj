@@ -38,7 +38,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8B311A73280DE9ED006BDACE /* Notion Postprocessor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Notion Postprocessor"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B311A73280DE9ED006BDACE /* Notion Postprocess */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Notion Postprocess"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B311A76280DE9ED006BDACE /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
 		8B311A80280DF6B9006BDACE /* ArgumentError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArgumentError.swift; sourceTree = "<group>"; };
 		8B311A85280EB021006BDACE /* String+RegularExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegularExpression.swift"; sourceTree = "<group>"; };
@@ -73,7 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				8B83D2D32816C14C00B45BCC /* Readme.md */,
-				8B311A75280DE9ED006BDACE /* Notion Postprocessor */,
+				8B311A75280DE9ED006BDACE /* Notion Postprocess */,
 				8B311A74280DE9ED006BDACE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -81,12 +81,12 @@
 		8B311A74280DE9ED006BDACE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8B311A73280DE9ED006BDACE /* Notion Postprocessor */,
+				8B311A73280DE9ED006BDACE /* Notion Postprocess */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		8B311A75280DE9ED006BDACE /* Notion Postprocessor */ = {
+		8B311A75280DE9ED006BDACE /* Notion Postprocess */ = {
 			isa = PBXGroup;
 			children = (
 				8B311A76280DE9ED006BDACE /* Command.swift */,
@@ -96,7 +96,7 @@
 				8B311A83280EB004006BDACE /* Common */,
 				8B311A93280FFC70006BDACE /* Files */,
 			);
-			path = "Notion Postprocessor";
+			path = "Notion Postprocess";
 			sourceTree = "<group>";
 		};
 		8B311A83280EB004006BDACE /* Common */ = {
@@ -199,9 +199,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8B311A72280DE9EC006BDACE /* Notion Postprocessor */ = {
+		8B311A72280DE9EC006BDACE /* Notion Postprocess */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8B311A7A280DE9ED006BDACE /* Build configuration list for PBXNativeTarget "Notion Postprocessor" */;
+			buildConfigurationList = 8B311A7A280DE9ED006BDACE /* Build configuration list for PBXNativeTarget "Notion Postprocess" */;
 			buildPhases = (
 				8B311A6F280DE9EC006BDACE /* Sources */,
 				8B311A70280DE9EC006BDACE /* Frameworks */,
@@ -211,12 +211,12 @@
 			);
 			dependencies = (
 			);
-			name = "Notion Postprocessor";
+			name = "Notion Postprocess";
 			packageProductDependencies = (
 				8B311A7E280DEE4B006BDACE /* ArgumentParser */,
 			);
 			productName = "Notion Postprocessor";
-			productReference = 8B311A73280DE9ED006BDACE /* Notion Postprocessor */;
+			productReference = 8B311A73280DE9ED006BDACE /* Notion Postprocess */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -234,7 +234,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8B311A6E280DE9EC006BDACE /* Build configuration list for PBXProject "Notion Postprocessor" */;
+			buildConfigurationList = 8B311A6E280DE9EC006BDACE /* Build configuration list for PBXProject "Notion Postprocess" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -250,7 +250,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8B311A72280DE9EC006BDACE /* Notion Postprocessor */,
+				8B311A72280DE9EC006BDACE /* Notion Postprocess */,
 			);
 		};
 /* End PBXProject section */
@@ -417,7 +417,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8B311A6E280DE9EC006BDACE /* Build configuration list for PBXProject "Notion Postprocessor" */ = {
+		8B311A6E280DE9EC006BDACE /* Build configuration list for PBXProject "Notion Postprocess" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8B311A78280DE9ED006BDACE /* Debug */,
@@ -426,7 +426,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8B311A7A280DE9ED006BDACE /* Build configuration list for PBXNativeTarget "Notion Postprocessor" */ = {
+		8B311A7A280DE9ED006BDACE /* Build configuration list for PBXNativeTarget "Notion Postprocess" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8B311A7B280DE9ED006BDACE /* Debug */,

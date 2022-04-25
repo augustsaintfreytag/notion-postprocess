@@ -14,7 +14,7 @@ import ArgumentParser
 /// - Correct name (read top level heading in `.md` file)
 ///
 
-@main struct NotionPostprocessor: ParsableCommand, RewriteCommand, RegroupCommand {
+@main struct NotionPostprocess: ParsableCommand, RewriteCommand, RegroupCommand {
 	
 	static let configuration = CommandConfiguration(
 		commandName: Manifest.command,
@@ -65,7 +65,7 @@ import ArgumentParser
 	
 }
 
-extension NotionPostprocessor {
+extension NotionPostprocess {
 	
 	enum CodingKeys: CodingKey {
 		case mode
