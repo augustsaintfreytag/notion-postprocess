@@ -32,13 +32,13 @@ import ArgumentParser
 	
 	// MARK: Parameters
 	
-	@Argument(help: "The mode of operation. (options: \(Mode.allCasesHelpDescription)) (default: both)")
-	var mode: Mode?
+	@Argument(help: "The mode of operation. (options: \(Mode.allCasesHelpDescription))")
+	var mode: Mode
 	
 	@Argument(help: "Path to the directory exported from Notion to be processed.", completion: CompletionKind.directory)
 	var inputPath: String
 	
-	@Flag(help: "Prints out the changes that would be made to the input but does not execute them.")
+	@Flag(help: "Print the changes made to the input but do not not execute them.")
 	var dryRun: Bool = false
 	
 	// MARK: State
@@ -51,7 +51,7 @@ import ArgumentParser
 		let directory = URL(fileURLWithPath: inputPath, isDirectory: true).standardizedFileURL
 		
 		switch mode {
-		case .none:
+		case .all:
 			try processDocuments(in: directory)
 			try groupDocuments(in: directory)
 		case .rewrite:
@@ -78,6 +78,7 @@ extension NotionPostprocessor {
 // MARK: Mode
 
 enum Mode: String, CaseIterable, ExpressibleByArgument {
+	case all
 	case rewrite
 	case regroup
 }
