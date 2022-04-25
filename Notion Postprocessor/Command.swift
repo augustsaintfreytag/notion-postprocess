@@ -16,6 +16,20 @@ import ArgumentParser
 
 @main struct NotionPostprocessor: ParsableCommand, RewriteCommand, RegroupCommand {
 	
+	static let configuration = CommandConfiguration(
+		commandName: Manifest.command,
+		abstract: "Process and rewrite data exported from Notion for import and use in Craft.",
+		discussion: lines(
+			"The utility processes a Markdown export from Notion, either of a single page or a whole workspace.",
+			"Note that Notion produces a compressed ZIP archive by default, the utility expects an extracted directory structure.",
+			"The passed input directory and files are *changed in place*.",
+			"All operation modes should be considered not idempotent, it is recommended to",
+			"keep a backup of the exported data should the migration encounter issues."
+		),
+		version: "\(Manifest.name), Version \(Manifest.versionDescription)",
+		helpNames: [.customShort("?"), .long]
+	)
+	
 	// MARK: Parameters
 	
 	@Argument(help: "The mode of operation. (options: \(Mode.allCasesHelpDescription)) (default: both)")
