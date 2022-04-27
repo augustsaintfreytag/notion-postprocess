@@ -2,9 +2,17 @@
 
 This is a utility to aid in the migration of content from Notion to Craft. It works on input from the Markdown export provided by the Notion app (called “Markdown & CSV”) and processes a hierarchy of specific pages and subpages  or a whole workspace export in one step. The resulting structure of directories and files can be imported into Craft as-is, with working resource paths (images, videos, other media) and page links.
 
+## Installation
+
+Notion Postprocess is currently available for *macOS* only. It can be built from source by cloning the project and building or archiving using Apple Xcode with the included project file.
+
+Prebuilt binaries are also available at [https://gitlab.com/apricum/notion-postprocess/-/releases](https://gitlab.com/apricum/notion-postprocess/-/releases). Download the binary package for the most recent version, run the utility from there, or install into your `$PATH`, e.g. into `/usr/local/bin/notion-postproces`.
+
+Sitenote: With a manifest file (`Package.swift`) for the Swift Package Manager, the project may be built for *Linux* and *Windows*, likely without needing other changes. The current releases are only built with Xcode for saving time in development.
+
 ## Usage
 
-The postprocess utility two independent passes, one for *rewrite*, one for *regroup*. All changes are made in-place, changing the given input directories and files on the file system. The pass to run can be specified as an optional first argument; when omitted, both passes are run sequentially.
+The postprocess utility offers two independent passes, one for *rewrite*, one for *regroup*. All changes are made in-place, changing the given input directories and files on the file system. The pass to run can be specified as an optional first argument; when omitted, both passes are run sequentially.
 
 Note that the *regroup* operation is intended to use the output of the rewrite pass for best results, though it can theoretically be used with any input structure.
 
@@ -25,17 +33,17 @@ OPTIONS:
 
 ```Bash
 # Rewrite and regroup all files and directories
-notion-postprocess all "./Workspace Export" --dry-run
+notion-postprocessor all "./Workspace Export" --dry-run
 ```
 
 ```Bash
 # Rewrite all files and directories
-notion-postprocess rewrite "./Workspace Export"
+notion-postprocessor rewrite "./Workspace Export"
 ```
 
 ```Bash
 # Regroup files with associated group directories
-notion-postprocess regroup "./Workspace Export"
+notion-postprocessor regroup "./Workspace Export"
 ```
 
 ## In-Depth
@@ -56,7 +64,7 @@ Remove first-level headings in all documents. Craft takes document titles from t
 
 #### Callout Blocks
 
-Unwrap content from Notion “callout” blocks. Craft does not expose its own “block highlight” through Markdown (only its quote style). Changing the former callout block content manually is easier if migrated clean (as content only). The currently edited block can be made block highlight with ::⌘⇧'::.
+Unwrap content from Notion “callout” blocks. Craft does not expose its own “block highlight” through Markdown (only its quote style). Changing the former callout block content manually is easier if migrated clean (as content only). The currently edited block can be made block highlight with ⌘⇧'.
 
 #### Code Blocks
 
