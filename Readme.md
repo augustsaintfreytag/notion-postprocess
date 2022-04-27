@@ -1,8 +1,8 @@
 # Notion Postprocess
 
-This is a utility to aid in the migration of content from Notion to Craft. It works on input from the Markdown export provided by the Notion app (called “Markdown & CSV”) and processes a hierarchy of specific pages and subpages  or a whole workspace export in one step. The resulting structure of directories and files can be imported into Craft as-is, with working resource paths (images, videos, other media) and page links.
+*Notion Postprocess* is a utility to aid in the migration of content from Notion to Craft. It works on input from the Markdown export provided by the Notion app (called “Markdown & CSV”) and processes a hierarchy of specific pages and subpages  or a whole workspace export in one step. The resulting structure of directories and files can be imported into Craft as-is, with working resource paths (images, videos, other media) and page links.
 
-## Installation
+# Installation
 
 Notion Postprocess is currently available for *macOS* only. It can be built from source by cloning the project and building or archiving using Apple Xcode with the included project file.
 
@@ -10,7 +10,7 @@ Prebuilt binaries are also available at [https://gitlab.com/apricum/notion-postp
 
 Sitenote: With a manifest file (`Package.swift`) for the Swift Package Manager, the project may be built for *Linux* and *Windows*, likely without needing other changes. The current releases are only built with Xcode for saving time in development.
 
-## Usage
+# Usage
 
 The postprocess utility offers two independent passes, one for *rewrite*, one for *regroup*. All changes are made in-place, changing the given input directories and files on the file system. The pass to run can be specified as an optional first argument; when omitted, both passes are run sequentially.
 
@@ -29,7 +29,7 @@ OPTIONS:
   -?, --help              Show help information.
 ```
 
-## Examples
+# Examples
 
 ```Bash
 # Rewrite and regroup all files and directories
@@ -46,39 +46,39 @@ notion-postprocessor rewrite "./Workspace Export"
 notion-postprocessor regroup "./Workspace Export"
 ```
 
-## In-Depth
+# In-Depth
 
 This section documents what kind of changes are made by the utility.
 
-### Rewrite
+## Rewrite
 
 The *rewrite* pass recursively iterates over all directories and files, breadth-first, and performs the following operations:
 
-#### Name Restoration
+### Name Restoration
 
 Restore the intended name of all documents. When Notion exports files, their names are truncated and get an identifier appended that has no purpose outside of Notion (e.g. `New Digital` becomes `New Digita 78d87`). This step restores the original intended name by reading the first-level heading of the document. The name mapping is also cached if it reappears in other parts of the hierarchy.
 
-#### Document Headings
+### Document Headings
 
 Remove first-level headings in all documents. Craft takes document titles from their file name when importing data. Leaving the first-level heading in the document would appear as a duplicate.
 
-#### Callout Blocks
+### Callout Blocks
 
-Unwrap content from Notion “callout” blocks. Craft does not expose its own “block highlight” through Markdown (only its quote style). Changing the former callout block content manually is easier if migrated clean (as content only). The currently edited block can be made block highlight with ⌘⇧'.
+Unwrap content from Notion “callout” blocks. Craft does not expose its own “block highlight” through Markdown (only its quote style). Changing the former callout block content manually is easier if migrated clean (as content only). The currently edited block can be made a block highlight with ⌘⇧'.
 
-#### Code Blocks
+### Code Blocks
 
 Convert language identifiers in code blocks. Some language identifiers in Markdown content blocks use different identifiers in Craft, these are converted to their new versions (for example `js` becomes `JavaScript`).
 
-#### Embedded Content Links
+### Embedded Content Links
 
 Rewrite embedded content links (files like images and videos). Changing file and directory names requires the link paths inside of documents to be changed as well. The utility creates a map (or “index”) of name changes that is also used to rewrite links. For instance, a document embedding an image will have a new valid link to that image after the rewrite. External links are not affected by the rewrite.
 
-#### Document Links
+### Document Links
 
 Rewrite cross-document links. Like embedded media files, links between documents are changed as well to match their path after the rewrite is performed — all links between documents should work after being imported into Craft.
 
-### Regroup
+## Regroup
 
 Regrouping is is an *optional* refinement step. This step restructures documents to move them inside their corresponding folder if one exists. By default, the structure exported by Notion leaves parent and child pages in a form like the following:
 
@@ -112,11 +112,11 @@ The resulting structure has much better readability and ergonomics when imported
 
 The *regroup* pass performs the following operations:
 
-#### Move Documents
+### Move Documents
 
 Find documents and directories with the same name to match up. Move documents inside their associated folder if one is found.
 
-#### Document Links
+### Document Links
 
 Rewrite resource and document links. This step finds paths where the processed document name appears as part of a path and rewrites it. Makes resource links match the structure changed by the regrouping pass.
 
