@@ -50,6 +50,7 @@
 		8B83D2CE2816A52C00B45BCC /* Manifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Manifest.swift; sourceTree = "<group>"; };
 		8B83D2D12816A60600B45BCC /* ExpressibleByArgument+Description.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExpressibleByArgument+Description.swift"; sourceTree = "<group>"; };
 		8B83D2D32816C14C00B45BCC /* Readme.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Readme.md; sourceTree = "<group>"; };
+		8B8EAF2828193666004C1076 /* License.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = License.md; sourceTree = "<group>"; };
 		8B9C849D2812B36900353D9A /* FileError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileError.swift; sourceTree = "<group>"; };
 		8B9C84A02813F4B200353D9A /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
 		8B9C84A42813FE7800353D9A /* DirectoryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryWriter.swift; sourceTree = "<group>"; };
@@ -73,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				8B83D2D32816C14C00B45BCC /* Readme.md */,
+				8B8EAF2828193666004C1076 /* License.md */,
 				8B311A75280DE9ED006BDACE /* Notion Postprocess */,
 				8B311A74280DE9ED006BDACE /* Products */,
 			);
